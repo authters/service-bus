@@ -12,7 +12,7 @@ abstract class Messager implements BaseBus
     /**
      * @var iterable
      */
-    public $map;
+    protected $map;
 
     /**
      * @var Tracker

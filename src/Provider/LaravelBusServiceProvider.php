@@ -6,6 +6,7 @@ namespace Authters\ServiceBus\Provider;
 
 use Authters\ServiceBus\Contract\Manager\ServiceBusManager;
 use Authters\ServiceBus\Manager\DefaultBusManager;
+use Authters\ServiceBus\Manager\ServiceBusManager as DefaultManager;
 use Illuminate\Support\ServiceProvider;
 
 class LaravelBusServiceProvider extends ServiceProvider
@@ -27,7 +28,7 @@ class LaravelBusServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->app->singleton(ServiceBusManager::class, DefaultBusManager::class);
+        $this->app->singleton(ServiceBusManager::class, DefaultManager::class);
 
         $this->app->alias(ServiceBusManager::class, 'service_bus.manager');
     }
@@ -44,6 +45,6 @@ class LaravelBusServiceProvider extends ServiceProvider
 
     protected function getConfigPath(): string
     {
-        return __DIR__ . '../../config/service_bus.php';
+        return __DIR__ . '/../../config/service_bus.php';
     }
 }

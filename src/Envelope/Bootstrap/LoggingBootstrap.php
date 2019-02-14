@@ -4,11 +4,14 @@ namespace Authters\ServiceBus\Envelope\Bootstrap;
 
 use Authters\ServiceBus\Contract\Envelope\Middleware;
 use Authters\ServiceBus\Envelope\Envelope;
+use Authters\ServiceBus\Support\DetectMessageName;
 use Authters\ServiceBus\Tracker\DefaultActionEvent;
 use Psr\Log\LoggerInterface;
 
 class LoggingBootstrap implements Middleware
 {
+    use DetectMessageName;
+
     /**
      * @var LoggerInterface
      */
@@ -22,7 +25,7 @@ class LoggingBootstrap implements Middleware
     public function handle(Envelope $envelope, callable $next)
     {
         $message = $envelope->getMessage();
-        $messageName = $envelope->messageName();
+        $messageName = $this->detectMessageName($message);
 
         $context = [
             'message' => $message,
@@ -32,9 +35,6 @@ class LoggingBootstrap implements Middleware
         $this->logger->debug("Starting handling message $messageName", $context);
 
         try {
-            $envelope->getMessageTracker()->subscribe('dispatch', [$this, ['onDispatching']]);
-            $envelope->getMessageTracker()->subscribe('finalize', [$this, ['onFinalizing']]);
-
             $envelope = $next($envelope);
 
         } catch (\Throwable $exception) {
@@ -47,19 +47,5 @@ class LoggingBootstrap implements Middleware
         $this->logger->debug("Finished handling message $messageName", $context);
 
         return $envelope;
-    }
-
-    public function onDispatching(DefaultActionEvent $event): void
-    {
-        $messageName = $event->messageName();
-
-        $this->logger->debug("Starting dispatching message $messageName", $event->all());
-    }
-
-    public function onFinalizing(DefaultActionEvent $event): void
-    {
-        $messageName = $event->messageName();
-
-        $this->logger->debug("Finalizing dispatched message $messageName", $event->all());
     }
 }

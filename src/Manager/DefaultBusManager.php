@@ -45,8 +45,8 @@ abstract class DefaultBusManager
 
     protected function newMessageTracker(string $busType): Tracker
     {
-        $tracker = $busConfig['tracker']
-            ?? $this->defaultParameterSwitcher('default.tracker');
+        $tracker = $busConfig['message.tracker']
+            ?? $this->defaultParameterSwitcher('default.message.tracker');
 
         return $this->app->make($tracker);
     }
@@ -62,7 +62,7 @@ abstract class DefaultBusManager
 
     private function buildDefaultsMiddleware(array $busConfig): array
     {
-        $middleware = $this->defaultParameterSwitcher('default.middleware') ?? [];
+        $middleware = $this->defaultParameterSwitcher('middleware') ?? [];
 
         return array_merge($middleware, $busConfig['middleware'] ?? []);
     }
@@ -133,7 +133,7 @@ abstract class DefaultBusManager
             return $this->app->make($routeId);
         }
 
-        if (!$routeId || !class_exists($routeId) || !$routeId instanceof Route) {
+        if (!$routeId || !class_exists($routeId) /*|| !$routeId instanceof Route*/) {
             throw new RuntimeException("Invalid route $routeId in service bus config");
         }
 
@@ -153,7 +153,7 @@ abstract class DefaultBusManager
             return $this->app->make($router);
         }
 
-        if (!$router || !class_exists($router) || !$router instanceof Router) {
+        if (!$router || !class_exists($router) /* || !$router instanceof Router*/) {
             throw new RuntimeException("Invalid router $router in service bus config");
         }
 
@@ -186,7 +186,7 @@ abstract class DefaultBusManager
 
     private function determineCollectibleExceptions(array $busConfig): bool
     {
-        $collectible = $$busConfig['collect_exceptions'] ??
+        $collectible = $busConfig['collect_exceptions'] ??
             $this->defaultParameterSwitcher('default.collect_exceptions');
 
         return true === $collectible ?? false;
@@ -195,7 +195,7 @@ abstract class DefaultBusManager
     private function determineNullableMessageHandler(array $busConfig): bool
     {
         // checkMe reserve to multiple handlers router / Event bus
-        $allowNullHandler = $$busConfig['allow_null_handler'] ??
+        $allowNullHandler = $busConfig['allow_null_handler'] ??
             $this->defaultParameterSwitcher('default.allow_null_handler');
 
         return true === $allowNullHandler ?? false;
