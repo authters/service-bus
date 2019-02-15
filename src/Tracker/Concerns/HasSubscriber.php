@@ -3,6 +3,7 @@
 namespace Authters\ServiceBus\Tracker\Concerns;
 
 use Authters\ServiceBus\Contract\Tracker\ListenerHandler;
+use Authters\ServiceBus\Exception\RuntimeException;
 use Authters\ServiceBus\Tracker\DefaultListenerHandler;
 
 trait HasSubscriber
@@ -10,7 +11,7 @@ trait HasSubscriber
     public function subscribe(string $event, callable $callback, int $priority = 0): ListenerHandler
     {
         if (!in_array($event, $this->eventNames, true)) {
-            throw new \InvalidArgumentException("Unknown event name: $event");
+            throw new RuntimeException("Unknown event name: $event");
         }
 
         $handler = new DefaultListenerHandler($callback);

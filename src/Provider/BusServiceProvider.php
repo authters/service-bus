@@ -9,7 +9,7 @@ use Authters\ServiceBus\Manager\DefaultBusManager;
 use Authters\ServiceBus\Manager\ServiceBusManager as DefaultManager;
 use Illuminate\Support\ServiceProvider;
 
-class LaravelBusServiceProvider extends ServiceProvider
+class BusServiceProvider extends ServiceProvider
 {
     /**
      * @var bool

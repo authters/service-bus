@@ -38,7 +38,7 @@
     },
     "laravel": {
       "providers": [
-        "Authters\\ServiceBus\\Provider\\LaravelBusServiceProvider"
+        "Authters\\ServiceBus\\Provider\\BusServiceProvider"
       ]
     }
   }

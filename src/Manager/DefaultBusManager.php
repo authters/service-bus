@@ -13,7 +13,6 @@ use Authters\ServiceBus\Envelope\Route\Strategy\RouteNoneAsync;
 use Authters\ServiceBus\Envelope\Route\Strategy\RouteOnlyMarkedAsync;
 use Authters\ServiceBus\Exception\RuntimeException;
 use Authters\ServiceBus\Message\Async\IlluminateProducer;
-use Illuminate\Contracts\Bus\QueueingDispatcher;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Collection;
 use Psr\Container\ContainerInterface;
@@ -43,10 +42,10 @@ abstract class DefaultBusManager
         $this->namespace = $namespace;
     }
 
-    protected function newMessageTracker(string $busType): Tracker
+    protected function newMessageTracker(string $busType, array $busConfig): Tracker
     {
         $tracker = $busConfig['message.tracker']
-            ?? $this->defaultParameterSwitcher('default.message.tracker');
+            ?? $this->valueFrom('default.message.tracker');
 
         return $this->app->make($tracker);
     }
@@ -62,7 +61,7 @@ abstract class DefaultBusManager
 
     private function buildDefaultsMiddleware(array $busConfig): array
     {
-        $middleware = $this->defaultParameterSwitcher('middleware') ?? [];
+        $middleware = $this->valueFrom('middleware') ?? [];
 
         return array_merge($middleware, $busConfig['middleware'] ?? []);
     }
@@ -79,7 +78,7 @@ abstract class DefaultBusManager
     private function determineRouteStrategy(array $busConfig): ?MessageRouteStrategy
     {
         $strategy = $busConfig['route_strategy']
-            ?? $this->defaultParameterSwitcher('default.route_strategy');
+            ?? $this->valueFrom('default.route_strategy');
 
         if (!$strategy) {
             return null;
@@ -108,32 +107,29 @@ abstract class DefaultBusManager
 
     private function determineMessageProducer(array $busConfig): MessageProducer
     {
-        // is this useful to make it configure per bus ???
         $messageProducerId = $busConfig['message.producer'] ??
-            $this->defaultParameterSwitcher('default.message.producer');
+            $this->valueFrom('default.message.producer');
 
         if ($this->app->bound($messageProducerId)) {
             return $this->app->make($messageProducerId);
         }
 
         $messageConverterId = $busConfig['message.converter'] ??
-            $this->defaultParameterSwitcher('default.message.converter');
+            $this->valueFrom('default.message.converter');
 
-        return new IlluminateProducer(
-            $this->app->make(QueueingDispatcher::class),
-            $this->app->make($messageConverterId)
-        );
+        $this->app->bindIf($messageConverterId);
+
+        return $this->app->make(IlluminateProducer::class);
     }
 
     private function buildRoutes(array $busConfig): Route
     {
         $routeId = $busConfig['route'];
-
         if ($this->app->bound($routeId)) {
             return $this->app->make($routeId);
         }
 
-        if (!$routeId || !class_exists($routeId) /*|| !$routeId instanceof Route*/) {
+        if (!$routeId || !class_exists($routeId)) {
             throw new RuntimeException("Invalid route $routeId in service bus config");
         }
 
@@ -153,7 +149,7 @@ abstract class DefaultBusManager
             return $this->app->make($router);
         }
 
-        if (!$router || !class_exists($router) /* || !$router instanceof Router*/) {
+        if (!$router || !class_exists($router)) {
             throw new RuntimeException("Invalid router $router in service bus config");
         }
 
@@ -167,7 +163,7 @@ abstract class DefaultBusManager
     private function determineServiceLocator(array $busConfig): ?ContainerInterface
     {
         $serviceLocator = $busConfig['service_locator']
-            ?? $this->defaultParameterSwitcher('default.service_locator');
+            ?? $this->valueFrom('default.service_locator');
 
         if (!$serviceLocator) {
             return null;
@@ -179,7 +175,7 @@ abstract class DefaultBusManager
     private function determineCallableHandler(array $busConfig): ?callable
     {
         $strategy = $busConfig['callable_handler'] ??
-            $this->defaultParameterSwitcher('default.callable_handler');
+            $this->valueFrom('default.callable_handler');
 
         return $strategy ? $this->app->make($strategy) : null;
     }
@@ -187,7 +183,7 @@ abstract class DefaultBusManager
     private function determineCollectibleExceptions(array $busConfig): bool
     {
         $collectible = $busConfig['collect_exceptions'] ??
-            $this->defaultParameterSwitcher('default.collect_exceptions');
+            $this->valueFrom('default.collect_exceptions');
 
         return true === $collectible ?? false;
     }
@@ -196,7 +192,7 @@ abstract class DefaultBusManager
     {
         // checkMe reserve to multiple handlers router / Event bus
         $allowNullHandler = $busConfig['allow_null_handler'] ??
-            $this->defaultParameterSwitcher('default.allow_null_handler');
+            $this->valueFrom('default.allow_null_handler');
 
         return true === $allowNullHandler ?? false;
     }

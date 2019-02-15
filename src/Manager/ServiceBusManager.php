@@ -38,7 +38,7 @@ class ServiceBusManager extends DefaultBusManager implements Manager
 
     protected function create(string $busName, string $busType): Messager
     {
-        $busConfig = $this->getConfigurationBus($busType, $busName);
+        $busConfig = $this->getBusConfiguration($busType, $busName);
 
         $serviceBusId = $busConfig['service_bus'];
         if ($preconfiguredServiceBus = $this->preconfiguredServiceBus($serviceBusId)) {
@@ -47,7 +47,7 @@ class ServiceBusManager extends DefaultBusManager implements Manager
 
         return new $serviceBusId(
             $this->buildMiddleware($busConfig),
-            $this->newMessageTracker($busType)
+            $this->newMessageTracker($busType, $busConfig)
         );
     }
 

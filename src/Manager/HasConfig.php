@@ -9,7 +9,7 @@ use Authters\ServiceBus\QueryBus;
 
 trait HasConfig
 {
-    protected function defaultParameterSwitcher(string $serviceKey, array $busConfig = null)
+    protected function valueFrom(string $serviceKey, array $busConfig = null, $defaultValue = null)
     {
         if (null === $busConfig) {
             return array_get($this->getGlobalConfiguration(), $serviceKey);
@@ -19,17 +19,17 @@ trait HasConfig
             return $value;
         }
 
-        return array_get($this->getGlobalConfiguration(), $serviceKey);
+        return $defaultValue;
     }
 
     protected function getGlobalConfiguration(): array
     {
-        $id = sprintf('service_bus.%s', $this->namespace);
+        $key = sprintf('service_bus.%s', $this->namespace);
 
-        return $this->app->make('config')->get($id);
+        return $this->app->make('config')->get($key);
     }
 
-    protected function getConfigurationBus(string $type, string $name): array
+    protected function getBusConfiguration(string $type, string $name): array
     {
         $defaultType = $this->determineBusType($type);
 

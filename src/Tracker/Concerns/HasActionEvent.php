@@ -2,6 +2,8 @@
 
 namespace Authters\ServiceBus\Tracker\Concerns;
 
+use Authters\ServiceBus\Exception\RuntimeException;
+
 trait HasActionEvent
 {
     /**
@@ -25,7 +27,7 @@ trait HasActionEvent
             return $name;
         }
 
-        throw new \RuntimeException('No name set for action event');
+        throw new RuntimeException('No name set for action event');
     }
 
     public function getTarget()
