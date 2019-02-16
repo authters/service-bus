@@ -42,13 +42,18 @@ final class IlluminateProducer implements MessageProducer
     {
         $payload = $this->messageConverter->convertToArray($message);
 
-        switch($message){
+        return new MessageJob($payload, $this->determineBusType($message));
+    }
+
+    protected function determineBusType(Message $message): string
+    {
+        switch ($message) {
             case  $message instanceof Command:
-                return new MessageJob($payload, CommandBus::class);
+                return CommandBus::class;
             case  $message instanceof Query:
-                return new MessageJob($payload, QueryBus::class);
+                return QueryBus::class;
             case  $message instanceof DomainEvent:
-                return new MessageJob($payload, EventBus::class);
+                return EventBus::class;
         }
 
         throw new RuntimeException("Unknown bus type for message \get_class($message)");

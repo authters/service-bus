@@ -32,6 +32,9 @@ class MessageValidatorSubscriber implements EventSubscriber
 
             if ($message instanceof ValidateMessage) {
                 try {
+
+                    // checkMe add metadata _message_validated = true
+                    // and reset message on event
                     $this->validate($message);
                 } catch (\Throwable $exception) {
                     if ($message instanceof PreValidateMessage) {

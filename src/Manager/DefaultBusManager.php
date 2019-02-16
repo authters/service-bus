@@ -63,18 +63,22 @@ abstract class DefaultBusManager
 
     private function buildDefaultsMiddleware(array $busConfig): array
     {
-        $middleware = $this->valueFrom('middleware') ?? [];
+        $middleware = array_merge(
+            $this->valueFrom('middleware') ?? [],
+            $busConfig['middleware'] ?? []
+        );
 
-        $middleware = array_merge($middleware, $busConfig['middleware'] ?? []);
+        return array_map(function ($bootstrap) use ($busConfig) {
+            [$boot, $priority] = $bootstrap;
 
-        foreach ($middleware as [&$bootstrap, $priority]) {
-            if ($bootstrap === MessageTrackerBootstrap::class) {
+            if ($boot === MessageTrackerBootstrap::class) {
                 $subscribers = $this->determineSubscribers($busConfig);
-                $bootstrap = $this->app->make(MessageTrackerBootstrap::class, $subscribers);
-            }
-        }
 
-        return $middleware;
+                return [new MessageTrackerBootstrap($subscribers), $priority];
+            }
+
+            return $bootstrap;
+        }, $middleware);
     }
 
     private function buildRouteStrategy(array $busConfig): RouteStrategy

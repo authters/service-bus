@@ -24,6 +24,6 @@ final class MessageJob
 
     public function handle(Container $container): void
     {
-       $container->make($this->busType)->dispatch($this->payload);
+        $container->make($this->busType)->dispatch($this->payload);
     }
 }
