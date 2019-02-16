@@ -5,8 +5,8 @@ namespace Authters\ServiceBus\Manager;
 use Authters\ServiceBus\Contract\Envelope\Route\Strategy\MessageRouteStrategy;
 use Authters\ServiceBus\Contract\Message\MessageProducer;
 use Authters\ServiceBus\Contract\Message\Router\Router;
+use Authters\ServiceBus\Contract\Tracker\EventSubscriber;
 use Authters\ServiceBus\Contract\Tracker\Tracker;
-use Authters\ServiceBus\Envelope\Bootstrap\MessageTrackerBootstrap;
 use Authters\ServiceBus\Envelope\Route\Route;
 use Authters\ServiceBus\Envelope\Route\RouteStrategy;
 use Authters\ServiceBus\Envelope\Route\Strategy\RouteAllAsync;
@@ -49,7 +49,17 @@ abstract class DefaultBusManager
         $tracker = $busConfig['message.tracker']
             ?? $this->valueFrom('default.message.tracker');
 
-        return $this->app->make($tracker);
+        $defaultTracker = $this->app->make($tracker);
+        $subscribers = $this->determineSubscribers($busConfig);
+
+        if ($subscribers) {
+            /** @var EventSubscriber $subscriber */
+            foreach ($subscribers as $subscriber) {
+                $subscriber->attachToBus($defaultTracker, $busType);
+            }
+        }
+
+        return $defaultTracker;
     }
 
     protected function buildMiddleware(array $busConfig): iterable
@@ -61,24 +71,25 @@ abstract class DefaultBusManager
         return $this->resolveSortedMiddleware($middleware);
     }
 
+    private function determineSubscribers(array $busConfig): array
+    {
+        $subscribers = $busConfig['tracker.subscribers'] ?? $this->valueFrom('default.tracker.subscribers');
+
+        if ($subscribers) {
+            foreach ($subscribers as &$subscriber) {
+                $subscriber = $this->app->make($subscriber);
+            }
+        }
+
+        return $subscribers;
+    }
+
     private function buildDefaultsMiddleware(array $busConfig): array
     {
-        $middleware = array_merge(
+        return array_merge(
             $this->valueFrom('middleware') ?? [],
             $busConfig['middleware'] ?? []
         );
-
-        return array_map(function ($bootstrap) use ($busConfig) {
-            [$boot, $priority] = $bootstrap;
-
-            if ($boot === MessageTrackerBootstrap::class) {
-                $subscribers = $this->determineSubscribers($busConfig);
-
-                return [new MessageTrackerBootstrap($subscribers), $priority];
-            }
-
-            return $bootstrap;
-        }, $middleware);
     }
 
     private function buildRouteStrategy(array $busConfig): RouteStrategy
@@ -210,19 +221,6 @@ abstract class DefaultBusManager
             $this->valueFrom('default.allow_null_handler');
 
         return true === $allowNullHandler ?? false;
-    }
-
-    private function determineSubscribers(array $busConfig): array
-    {
-        $subscribers = $busConfig['subscribers'] ?? $this->valueFrom('default.subscribers');
-
-        if ($subscribers) {
-            foreach ($subscribers as &$subscriber) {
-                $subscriber = $this->app->make($subscriber);
-            }
-        }
-
-        return $subscribers;
     }
 
     private function resolveSortedMiddleware(iterable $middleware): iterable

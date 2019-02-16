@@ -8,9 +8,9 @@ return [
          * Default configuration for each bus define in this namespace
          * ----------------------------------------------------------
          *
-         * Each key could be overridden in each bus config (without "default" key)
+         * Each key could be overridden in each bus config
          * and take precedence over the default provided
-         * Except: array subscribers and middleware which would be merged
+         * Except: array tracker subscribers and middleware which would be merged
          */
         'default' => [
 
@@ -52,11 +52,6 @@ return [
                 'producer' => \Authters\ServiceBus\Message\Async\IlluminateProducer::class,
 
                 /**
-                 * Default event tracker
-                 */
-                'tracker' => \Authters\ServiceBus\Tracker\MessageTracker::class,
-
-                /**
                  * Allow message not to have handler
                  * Should be reserved for Domain Event only
                  */
@@ -64,19 +59,19 @@ return [
             ],
 
             /**
-             * Interact with event tracker
-             *
-             * MOVE SUBSCRIBERS ARRAY FROM DEFAULT AS THEY ARE HANDLED BY the message tracker Bootstrap
-             * do we need to pas them to th bootstrap as we could easily from manager attach them to the tracker???
+             * Default event tracker and Subscribers
              */
-            'subscribers' => [
-                \Authters\ServiceBus\Message\FQCNMessageSubscriber::class, // before validator below
-                \Authters\ServiceBus\Message\Validation\MessageValidatorSubscriber::class,
-            ]
+            'tracker' => [
+                'service' => \Authters\ServiceBus\Tracker\MessageTracker::class,
+                'subscribers' => [
+                    \Authters\ServiceBus\Message\FQCNMessageSubscriber::class,
+                    \Authters\ServiceBus\Message\Validation\MessageValidatorSubscriber::class,
+                ]
+            ],
         ],
 
         /**
-         * Default Middleware associated with their priority
+         * Default Middleware with their priorities
          */
         'middleware' => [
             [\Authters\ServiceBus\Envelope\Bootstrap\ContentHandlerBootstrap::class, 100],
