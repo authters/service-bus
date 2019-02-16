@@ -6,6 +6,7 @@ use Authters\ServiceBus\Contract\Envelope\Route\Strategy\MessageRouteStrategy;
 use Authters\ServiceBus\Contract\Message\MessageProducer;
 use Authters\ServiceBus\Contract\Message\Router\Router;
 use Authters\ServiceBus\Contract\Tracker\Tracker;
+use Authters\ServiceBus\Envelope\Bootstrap\MessageTrackerBootstrap;
 use Authters\ServiceBus\Envelope\Route\Route;
 use Authters\ServiceBus\Envelope\Route\RouteStrategy;
 use Authters\ServiceBus\Envelope\Route\Strategy\RouteAllAsync;
@@ -15,6 +16,7 @@ use Authters\ServiceBus\Exception\RuntimeException;
 use Authters\ServiceBus\Message\Async\IlluminateProducer;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Collection;
+use Prooph\Common\Messaging\MessageConverter;
 use Psr\Container\ContainerInterface;
 
 abstract class DefaultBusManager
@@ -63,7 +65,16 @@ abstract class DefaultBusManager
     {
         $middleware = $this->valueFrom('middleware') ?? [];
 
-        return array_merge($middleware, $busConfig['middleware'] ?? []);
+        $middleware = array_merge($middleware, $busConfig['middleware'] ?? []);
+
+        foreach ($middleware as [&$bootstrap, $priority]) {
+            if ($bootstrap === MessageTrackerBootstrap::class) {
+                $subscribers = $this->determineSubscribers($busConfig);
+                $bootstrap = $this->app->make(MessageTrackerBootstrap::class, $subscribers);
+            }
+        }
+
+        return $middleware;
     }
 
     private function buildRouteStrategy(array $busConfig): RouteStrategy
@@ -117,7 +128,7 @@ abstract class DefaultBusManager
         $messageConverterId = $busConfig['message.converter'] ??
             $this->valueFrom('default.message.converter');
 
-        $this->app->bindIf($messageConverterId);
+        $this->app->bindIf(MessageConverter::class, $messageConverterId);
 
         return $this->app->make(IlluminateProducer::class);
     }
@@ -195,6 +206,19 @@ abstract class DefaultBusManager
             $this->valueFrom('default.allow_null_handler');
 
         return true === $allowNullHandler ?? false;
+    }
+
+    private function determineSubscribers(array $busConfig): array
+    {
+        $subscribers = $busConfig['subscribers'] ?? $this->valueFrom('default.subscribers');
+
+        if ($subscribers) {
+            foreach ($subscribers as &$subscriber) {
+                $subscriber = $this->app->make($subscriber);
+            }
+        }
+
+        return $subscribers;
     }
 
     private function resolveSortedMiddleware(iterable $middleware): iterable

@@ -12,6 +12,10 @@ return [
                 'producer' => \Authters\ServiceBus\Message\Async\IlluminateProducer::class,
                 'tracker' => \Authters\ServiceBus\Tracker\MessageTracker::class,
                 'allow_null_handler' => false,
+            ],
+            'subscribers' => [
+                \Authters\ServiceBus\Message\Validation\MessageValidatorSubscriber::class,
+                \Authters\ServiceBus\Message\FQCNMessageSubscriber::class,
             ]
         ],
 
@@ -19,7 +23,6 @@ return [
             [\Authters\ServiceBus\Envelope\Bootstrap\ContentHandlerBootstrap::class, 100],
             [\Authters\ServiceBus\Envelope\Bootstrap\LoggingBootstrap::class, 51],
             [\Authters\ServiceBus\Envelope\Bootstrap\MessageTrackerBootstrap::class, 50],
-            [\Authters\ServiceBus\Envelope\Route\FQCNRouteMessageFactory::class, 25]
         ],
 
         'buses' => [
@@ -58,12 +61,13 @@ return [
                     'middleware' => [],
                     'route' => \Authters\ServiceBus\Envelope\Route\EventRoute::class,
                     'router' => \Authters\ServiceBus\Message\Router\Defaults\EventRouter::class,
+                    'allow_null_handler' => true,
+                    'callable_handler' => \Authters\ServiceBus\Envelope\Route\Handler\OnEventHandler::class,
                     'routes' => [
 
                     ]
                 ]
             ]
-
         ]
     ]
 ];

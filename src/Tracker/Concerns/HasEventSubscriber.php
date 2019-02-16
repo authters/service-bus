@@ -1,18 +1,17 @@
 <?php
 
-namespace Authters\ServiceBus\Plugin;
+namespace Authters\ServiceBus\Tracker\Concerns;
 
-use Authters\ServiceBus\Contract\Plugin\Plugin;
 use Authters\ServiceBus\Contract\Tracker\Tracker;
 
-abstract class MessageTrackerPlugin implements Plugin
+trait HasEventSubscriber
 {
     /**
      * @var array
      */
     protected $listenerHandlers = [];
 
-    public function unTrack(Tracker $tracker): void
+    public function detachToBus(Tracker $tracker): void
     {
         foreach ($this->listenerHandlers as $listenerHandler) {
             $tracker->unsubscribe($listenerHandler);

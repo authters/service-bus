@@ -3,18 +3,28 @@
 namespace Authters\ServiceBus\Envelope\Bootstrap;
 
 use Authters\ServiceBus\Contract\Envelope\Middleware;
+use Authters\ServiceBus\Contract\Tracker\ActionEvent;
+use Authters\ServiceBus\Contract\Tracker\EventSubscriber;
 use Authters\ServiceBus\Contract\Tracker\MessageActionEvent;
 use Authters\ServiceBus\Envelope\Envelope;
 
 final class MessageTrackerBootstrap implements Middleware
 {
+    /**
+     * @var array
+     */
+    private $subscribers;
+
+    public function __construct(array $subscribers = [])
+    {
+        $this->subscribers = $subscribers;
+    }
+
     public function handle(Envelope $envelope, callable $next)
     {
-        $message = $envelope->getMessage();
+        $event = $this->createActionEvent($envelope);
 
-        $event = $envelope->newActionEvent($this, function (MessageActionEvent $event) use ($message) {
-            $event->setMessage($message);
-        });
+        $this->attachToTracker($envelope);
 
         try {
             $envelope->dispatching($event);
@@ -29,5 +39,22 @@ final class MessageTrackerBootstrap implements Middleware
         }
 
         return $envelope;
+    }
+
+    private function createActionEvent(Envelope $envelope): ActionEvent
+    {
+        $message = $envelope->getMessage();
+
+        return $envelope->newActionEvent($this, function (MessageActionEvent $event) use ($message) {
+            $event->setMessage($message);
+        });
+    }
+
+    private function attachToTracker(Envelope $envelope): void
+    {
+        /** @var EventSubscriber $subscriber */
+        foreach ($this->subscribers as $subscriber) {
+            $subscriber->attachToBus($envelope->getMessageTracker(), $envelope->busType());
+        }
     }
 }
