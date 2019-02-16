@@ -46,8 +46,8 @@ abstract class DefaultBusManager
 
     protected function newMessageTracker(string $busType, array $busConfig): Tracker
     {
-        $tracker = $busConfig['message.tracker']
-            ?? $this->valueFrom('default.message.tracker');
+        $tracker = $busConfig['tracker.service']
+            ?? $this->valueFrom('default.tracker.service');
 
         $defaultTracker = $this->app->make($tracker);
         $subscribers = $this->determineSubscribers($busConfig);
@@ -103,8 +103,8 @@ abstract class DefaultBusManager
 
     private function determineRouteStrategy(array $busConfig): ?MessageRouteStrategy
     {
-        $strategy = $busConfig['route_strategy']
-            ?? $this->valueFrom('default.route_strategy');
+        $strategy = $busConfig['message.route_strategy']
+            ?? $this->valueFrom('default.message.route_strategy');
 
         if (!$strategy) {
             return null;
@@ -188,8 +188,8 @@ abstract class DefaultBusManager
 
     private function determineServiceLocator(array $busConfig): ?ContainerInterface
     {
-        $serviceLocator = $busConfig['service_locator']
-            ?? $this->valueFrom('default.service_locator');
+        $serviceLocator = $busConfig['message.handler.resolver']
+            ?? $this->valueFrom('default.message.handler.resolver');
 
         if (!$serviceLocator) {
             return null;
@@ -200,8 +200,8 @@ abstract class DefaultBusManager
 
     private function determineCallableHandler(array $busConfig): ?callable
     {
-        $strategy = $busConfig['callable_handler'] ??
-            $this->valueFrom('default.callable_handler');
+        $strategy = $busConfig['message.handler.to_callable'] ??
+            $this->valueFrom('default.message.handler.to_callable');
 
         return $strategy ? $this->app->make($strategy) : null;
     }
@@ -217,8 +217,8 @@ abstract class DefaultBusManager
     private function determineNullableMessageHandler(array $busConfig): bool
     {
         // checkMe reserve to multiple handlers router / Event bus
-        $allowNullHandler = $busConfig['allow_null_handler'] ??
-            $this->valueFrom('default.allow_null_handler');
+        $allowNullHandler = $busConfig['message.handler.allow_null'] ??
+            $this->valueFrom('default.message.handler.allow_null');
 
         return true === $allowNullHandler ?? false;
     }

@@ -25,7 +25,7 @@ class MessageValidatorSubscriber implements EventSubscriber
         $this->validationFactory = $validationFactory;
     }
 
-    public function attachToBus(Tracker $tracker, string $messageBus = null): void
+    public function attachToBus(Tracker $tracker, string $messageBus): void
     {
         $this->listenerHandlers[] = $tracker->subscribe(Tracker::EVENT_DISPATCH, function (MessageActionEvent $event) use ($messageBus) {
             $message = $event->message();
@@ -34,6 +34,7 @@ class MessageValidatorSubscriber implements EventSubscriber
                 try {
 
                     // checkMe add metadata _message_validated = true
+                    // hasBeenValidated/IsValid
                     // and reset message on event
                     $this->validate($message);
                 } catch (\Throwable $exception) {

@@ -10,34 +10,9 @@ return [
          *
          * Each key could be overridden in each bus config
          * and take precedence over the default provided
-         * Except: array tracker subscribers and middleware which would be merged
+         * Excepts: array tracker subscribers and array middleware which would be merged
          */
         'default' => [
-
-            /**
-             * Resolve any handler through container
-             * the one provided will resolve any message handler class not bound in ioc
-             */
-            'service_locator' => \Authters\ServiceBus\Support\Container\IlluminateContainer::class,
-
-            /**
-             * How message should be produced async or fired immediately
-             * options: "route_only_async", "route_none_async", "route_all_async"
-             *
-             * @see \Authters\ServiceBus\Contract\Envelope\Route\Strategy\MessageRouteStrategy
-             */
-            'route_strategy' => 'route_only_async',
-
-            /**
-             * Resolve any handler according to a method name strategy
-             * e.g: event => onEvent, command => handle, query => find
-             *
-             * You should provide a valid callable otherwise if false stand
-             *
-             * MAKE IT PART OF MESSAGE
-             */
-            'callable_handler' => false,
-
 
             'message' => [
 
@@ -47,24 +22,68 @@ return [
                 'converter' => \Prooph\Common\Messaging\NoOpMessageConverter::class,
 
                 /**
+                 * How message should be produced async or fired immediately
+                 * options: "route_only_async", "route_none_async", "route_all_async"
+                 *
+                 * @see \Authters\ServiceBus\Contract\Envelope\Route\Strategy\MessageRouteStrategy
+                 */
+                'route_strategy' => 'route_only_async',
+
+                /**
                  * Simple bridge to produce async message behind an illuminate queue
                  */
                 'producer' => \Authters\ServiceBus\Message\Async\IlluminateProducer::class,
 
                 /**
-                 * Allow message not to have handler
-                 * Should be reserved for Domain Event only
+                 * Message handler
                  */
-                'allow_null_handler' => false,
+                'handler' => [
+
+                    /**
+                     * Allow message not to have handler
+                     * Should be reserved for Domain Event only
+                     */
+                    'allow_null' => false,
+
+                    /**
+                     * Resolve any handler according to a method name strategy
+                     * e.g: event => onEvent, command => handle, query => find
+                     * @see \Authters\ServiceBus\Envelope\Route\Handler\OnEventHandler
+                     *
+                     * Or provide a valid callable otherwise if false stand
+                     * @see \Authters\ServiceBus\Envelope\Route\Handler\CallableHandler
+                     */
+                    'to_callable' => false,
+
+                    /**
+                     * Resolve any class string handler through ioc
+                     * the one provided resolve them dynamically
+                     */
+                    'resolver' => \Authters\ServiceBus\Support\Container\IlluminateContainer::class,
+                ],
             ],
 
-            /**
-             * Default event tracker and Subscribers
-             */
             'tracker' => [
+
+                /**
+                 * Default event tracker providing default events
+                 */
                 'service' => \Authters\ServiceBus\Tracker\MessageTracker::class,
+
+                /**
+                 * Interact with defined events tracker
+                 */
                 'subscribers' => [
+
+                    /**
+                     * Transform any array message to a valid message instance
+                     */
                     \Authters\ServiceBus\Message\FQCNMessageSubscriber::class,
+
+                    /**
+                     * Validate / PreValidate message with the Illuminate Validator
+                     * Redundant with VO but useful for checking uniqueness/existence on PreValidation
+                     */
                     \Authters\ServiceBus\Message\Validation\MessageValidatorSubscriber::class,
                 ]
             ],
@@ -94,7 +113,6 @@ return [
                 ]
             ],
 
-
             'query' => [
 
                 'default' => [
@@ -116,9 +134,11 @@ return [
                     'route' => \Authters\ServiceBus\Envelope\Route\EventRoute::class,
                     'router' => \Authters\ServiceBus\Message\Router\Defaults\EventRouter::class,
                     'message' => [
-                        'allow_null_handler' => true,
+                        'handler' => [
+                            'allow_null' => true,
+                            'to_callable' =>\Authters\ServiceBus\Envelope\Route\Handler\OnEventHandler::class,
+                        ],
                     ],
-                    'callable_handler' => \Authters\ServiceBus\Envelope\Route\Handler\OnEventHandler::class,
                     'routes' => [
 
                     ]
