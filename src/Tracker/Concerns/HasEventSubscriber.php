@@ -11,7 +11,7 @@ trait HasEventSubscriber
      */
     protected $listenerHandlers = [];
 
-    public function detachToBus(Tracker $tracker): void
+    public function detachFromTracker(Tracker $tracker): void
     {
         foreach ($this->listenerHandlers as $listenerHandler) {
             $tracker->unsubscribe($listenerHandler);

@@ -46,6 +46,10 @@ class Envelope
 
     public function getMessage()
     {
+        if ($this->actionEvent) {
+            return $this->actionEvent->message();
+        }
+
         return $this->message;
     }
 
@@ -110,7 +114,7 @@ class Envelope
 
     public function newActionEvent($target = null, callable $callback = null): ActionEvent
     {
-        return $this->messageTracker->createEvent('dispatch', $target, $callback);
+        return $this->messageTracker->createEvent(Tracker::EVENT_DISPATCH, $target, $callback);
     }
 
     public function currentActionEvent(): MessageActionEvent

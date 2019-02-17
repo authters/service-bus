@@ -55,7 +55,7 @@ abstract class DefaultBusManager
         if ($subscribers) {
             /** @var EventSubscriber $subscriber */
             foreach ($subscribers as $subscriber) {
-                $subscriber->attachToBus($defaultTracker, $busType);
+                $subscriber->attachToTracker($defaultTracker, $busType);
             }
         }
 

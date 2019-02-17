@@ -22,7 +22,7 @@ class FQCNMessageSubscriber implements EventSubscriber
         $this->messageFactory = $messageFactory;
     }
 
-    public function attachToBus(Tracker $tracker, string $messageBus): void
+    public function attachToTracker(Tracker $tracker, string $messageBus): void
     {
         $this->listenerHandlers[] = $tracker->subscribe(Tracker::EVENT_DISPATCH, function (MessageActionEvent $event) {
             $message = $event->message();
@@ -39,6 +39,6 @@ class FQCNMessageSubscriber implements EventSubscriber
                 $event->setMessage($convertedMessage);
                 $event->setMessageName($messageName);
             }
-        });
+        }, Tracker::PRIORITY_INITIALIZE);
     }
 }

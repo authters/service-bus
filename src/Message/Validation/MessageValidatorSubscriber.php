@@ -25,7 +25,7 @@ class MessageValidatorSubscriber implements EventSubscriber
         $this->validationFactory = $validationFactory;
     }
 
-    public function attachToBus(Tracker $tracker, string $messageBus): void
+    public function attachToTracker(Tracker $tracker, string $messageBus): void
     {
         $this->listenerHandlers[] = $tracker->subscribe(Tracker::EVENT_DISPATCH, function (MessageActionEvent $event) use ($messageBus) {
             $message = $event->message();
