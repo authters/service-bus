@@ -46,7 +46,7 @@ abstract class DefaultBusManager
 
     protected function newMessageTracker(string $busType, array $busConfig): Tracker
     {
-        $tracker = $busConfig['tracker.service']
+        $tracker = $this->valueFrom('tracker.service', $busConfig)
             ?? $this->valueFrom('default.tracker.service');
 
         $defaultTracker = $this->app->make($tracker);
@@ -73,7 +73,8 @@ abstract class DefaultBusManager
 
     private function determineSubscribers(array $busConfig): array
     {
-        $subscribers = $busConfig['tracker.subscribers'] ?? $this->valueFrom('default.tracker.subscribers');
+        $subscribers = $this->valueFrom('tracker.subscribers', $busConfig)
+            ?? $this->valueFrom('default.tracker.subscribers');
 
         if ($subscribers) {
             foreach ($subscribers as &$subscriber) {
@@ -103,7 +104,7 @@ abstract class DefaultBusManager
 
     private function determineRouteStrategy(array $busConfig): ?MessageRouteStrategy
     {
-        $strategy = $busConfig['message.route_strategy']
+        $strategy = $this->valueFrom('message.route_strategy', $busConfig)
             ?? $this->valueFrom('default.message.route_strategy');
 
         if (!$strategy) {
@@ -133,14 +134,14 @@ abstract class DefaultBusManager
 
     private function determineMessageProducer(array $busConfig): MessageProducer
     {
-        $messageProducerId = $busConfig['message.producer'] ??
+        $messageProducerId = $this->valueFrom('message.producer', $busConfig) ??
             $this->valueFrom('default.message.producer');
 
         if ($this->app->bound($messageProducerId)) {
             return $this->app->make($messageProducerId);
         }
 
-        $messageConverterId = $busConfig['message.converter'] ??
+        $messageConverterId = $this->valueFrom('message.converter', $busConfig) ??
             $this->valueFrom('default.message.converter');
 
         $this->app->bindIf(MessageConverter::class, $messageConverterId);
@@ -188,7 +189,7 @@ abstract class DefaultBusManager
 
     private function determineServiceLocator(array $busConfig): ?ContainerInterface
     {
-        $serviceLocator = $busConfig['message.handler.resolver']
+        $serviceLocator = $this->valueFrom('message.handler.resolver', $busConfig)
             ?? $this->valueFrom('default.message.handler.resolver');
 
         if (!$serviceLocator) {
@@ -200,7 +201,7 @@ abstract class DefaultBusManager
 
     private function determineCallableHandler(array $busConfig): ?callable
     {
-        $strategy = $busConfig['message.handler.to_callable'] ??
+        $strategy = $this->valueFrom('message.handler.to_callable', $busConfig) ??
             $this->valueFrom('default.message.handler.to_callable');
 
         return $strategy ? $this->app->make($strategy) : null;
@@ -208,7 +209,7 @@ abstract class DefaultBusManager
 
     private function determineCollectibleExceptions(array $busConfig): bool
     {
-        $collectible = $busConfig['collect_exceptions'] ??
+        $collectible = $this->valueFrom('collect_exceptions', $busConfig) ??
             $this->valueFrom('default.collect_exceptions');
 
         return true === $collectible ?? false;
@@ -216,8 +217,7 @@ abstract class DefaultBusManager
 
     private function determineNullableMessageHandler(array $busConfig): bool
     {
-        // checkMe reserve to multiple handlers router / Event bus
-        $allowNullHandler = $busConfig['message.handler.allow_null'] ??
+        $allowNullHandler = $this->valueFrom('message.handler.allow_null', $busConfig) ??
             $this->valueFrom('default.message.handler.allow_null');
 
         return true === $allowNullHandler ?? false;

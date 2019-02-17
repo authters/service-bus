@@ -76,7 +76,7 @@ return [
                 'subscribers' => [
 
                     /**
-                     * Transform any array message to a valid message instance
+                     * Transform array message to a valid message instance
                      */
                     \Authters\ServiceBus\Message\FQCNMessageSubscriber::class,
 
