@@ -17,7 +17,7 @@ abstract class Messager implements BaseBus
     /**
      * @var Tracker
      */
-    protected $tracker;
+    private $tracker;
 
     public function __construct(iterable $middleware = [], Tracker $tracker = null)
     {
@@ -25,7 +25,15 @@ abstract class Messager implements BaseBus
         $this->tracker = $tracker ?? new MessageTracker();
     }
 
-    protected function dispatchMessage(Envelope $envelope)
+    protected function dispatchForBus(string $busType, $message)
+    {
+        $envelope = new Envelope($message, $this->tracker);
+        $envelope->setBusType($busType);
+
+        return $this->dispatchMessage($envelope);
+    }
+
+    private function dispatchMessage(Envelope $envelope)
     {
         return \call_user_func($this->callableForNextMiddleware(0, $envelope), $envelope);
     }
