@@ -6,7 +6,7 @@ use Authters\ServiceBus\Contract\Envelope\Route\Strategy\MessageRouteStrategy;
 use Authters\ServiceBus\Contract\Tracker\MessageActionEvent;
 use Authters\ServiceBus\Envelope\Envelope;
 use Authters\ServiceBus\Envelope\Route\RouteStrategy;
-use Authters\ServiceBus\Tracker\MessageTracker;
+use Authters\ServiceBus\Tracker\DefaultMessageTracker;
 use AuthtersTest\ServiceBus\TestCase;
 use AuthtersTest\ServiceBus\Unit\Mock\SomeCommand;
 use Prooph\Common\Messaging\Message;
@@ -38,7 +38,7 @@ class RouteStrategyTest extends TestCase
 
     protected function dispatchWithMessage(Message $message): Envelope
     {
-        $envelope = new Envelope($message, new MessageTracker());
+        $envelope = new Envelope($message, new DefaultMessageTracker());
         $event = $envelope->newActionEvent($this, function (MessageActionEvent $event) use ($message) {
             $event->setMessage($message);
         });

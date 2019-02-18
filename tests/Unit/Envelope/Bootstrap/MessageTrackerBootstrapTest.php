@@ -7,7 +7,7 @@ use Authters\ServiceBus\Contract\Tracker\Tracker;
 use Authters\ServiceBus\Envelope\Bootstrap\MessageTrackerBootstrap;
 use Authters\ServiceBus\Envelope\Envelope;
 use Authters\ServiceBus\Exception\RuntimeException;
-use Authters\ServiceBus\Tracker\MessageTracker;
+use Authters\ServiceBus\Tracker\DefaultMessageTracker;
 use AuthtersTest\ServiceBus\TestCase;
 
 class MessageTrackerBootstrapTest extends TestCase
@@ -19,7 +19,7 @@ class MessageTrackerBootstrapTest extends TestCase
     {
         $message = 'foo';
         $events = new MessageTrackerBootstrap();
-        $tracker = new MessageTracker();
+        $tracker = new DefaultMessageTracker();
 
         $listener = $tracker->listenToDispatcher(function (ActionEvent $event) {
             $this->assertFalse($event->isPropagationStopped());
@@ -44,7 +44,7 @@ class MessageTrackerBootstrapTest extends TestCase
     {
         $message = 'foo';
         $events = new MessageTrackerBootstrap();
-        $tracker = new MessageTracker();
+        $tracker = new DefaultMessageTracker();
 
         $listener = $tracker->listenToFinalizer(function (ActionEvent $event) {
             $this->assertTrue($event->isPropagationStopped());
@@ -70,7 +70,7 @@ class MessageTrackerBootstrapTest extends TestCase
     {
         $message = 'foo';
         $events = new MessageTrackerBootstrap();
-        $envelope = new Envelope($message, new MessageTracker());
+        $envelope = new Envelope($message, new DefaultMessageTracker());
 
         try {
             $events->handle($envelope, function () {

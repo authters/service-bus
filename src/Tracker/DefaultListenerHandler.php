@@ -4,7 +4,7 @@ namespace Authters\ServiceBus\Tracker;
 
 use Authters\ServiceBus\Contract\Tracker\ListenerHandler;
 
-class DefaultListenerHandler implements ListenerHandler
+final class DefaultListenerHandler implements ListenerHandler
 {
     /**
      * @var callable

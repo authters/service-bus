@@ -56,6 +56,6 @@ final class IlluminateProducer implements MessageProducer
                 return EventBus::class;
         }
 
-        throw new RuntimeException("Unknown bus type for message \get_class($message)");
+        throw new RuntimeException("Unknown bus type for message {\get_class($message)}");
     }
 }

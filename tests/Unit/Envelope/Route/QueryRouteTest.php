@@ -7,7 +7,7 @@ use Authters\ServiceBus\Contract\Tracker\MessageActionEvent;
 use Authters\ServiceBus\Envelope\Envelope;
 use Authters\ServiceBus\Envelope\Route\QueryRoute;
 use Authters\ServiceBus\Envelope\Route\Route;
-use Authters\ServiceBus\Tracker\MessageTracker;
+use Authters\ServiceBus\Tracker\DefaultMessageTracker;
 use AuthtersTest\ServiceBus\TestCase;
 use AuthtersTest\ServiceBus\Unit\Mock\SomeQueryHandler;
 use React\Promise\PromiseInterface;
@@ -60,7 +60,7 @@ class QueryRouteTest extends TestCase
 
     protected function dispatchWithMessage($message): Envelope
     {
-        $envelope = new Envelope($message, new MessageTracker());
+        $envelope = new Envelope($message, new DefaultMessageTracker());
         $event = $envelope->newActionEvent($this, function (MessageActionEvent $event) use ($message) {
             $event->setMessage($message);
         });

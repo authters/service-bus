@@ -9,7 +9,7 @@ use Authters\ServiceBus\Envelope\Route\Route;
 use Authters\ServiceBus\Envelope\Route\RouteStrategy;
 use Authters\ServiceBus\Envelope\Route\Strategy\RouteNoneAsync;
 use Authters\ServiceBus\Message\Router\SingleHandlerRouter;
-use Authters\ServiceBus\Tracker\MessageTracker;
+use Authters\ServiceBus\Tracker\DefaultMessageTracker;
 use AuthtersTest\ServiceBus\Example\Mock\SomeBus;
 use AuthtersTest\ServiceBus\Example\Mock\SomeMessage;
 use AuthtersTest\ServiceBus\Example\Mock\SomeMessageHandler;
@@ -33,7 +33,7 @@ class SomeBusTest extends TestCase
      */
     public function it_dispatch_object(): void
     {
-        $bus = new SomeBus($this->getMiddleware(), new MessageTracker());
+        $bus = new SomeBus($this->getMiddleware(), new DefaultMessageTracker());
 
         $bus->dispatch($this->message);
 
@@ -49,7 +49,7 @@ class SomeBusTest extends TestCase
         $handler = new SomeMessageHandler();
         $this->map = [$message => $handler];
 
-        $bus = new SomeBus($this->getMiddleware(), new MessageTracker());
+        $bus = new SomeBus($this->getMiddleware(), new DefaultMessageTracker());
 
         $bus->dispatch($message);
 

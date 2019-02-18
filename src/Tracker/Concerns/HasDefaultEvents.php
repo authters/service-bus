@@ -5,7 +5,7 @@ namespace Authters\ServiceBus\Tracker\Concerns;
 use Authters\ServiceBus\Contract\Tracker\MessageActionEvent;
 use Authters\ServiceBus\Exception\MessageDispatchedFailure;
 
-trait HasDefaultEventSubscriber
+trait HasDefaultEvents
 {
     protected function onInitialization(): void
     {

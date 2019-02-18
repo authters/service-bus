@@ -8,7 +8,7 @@ use Authters\ServiceBus\Contract\Tracker\MessageActionEvent;
 use Authters\ServiceBus\Envelope\Envelope;
 use Authters\ServiceBus\Envelope\Route\CommandRoute;
 use Authters\ServiceBus\Envelope\Route\Route;
-use Authters\ServiceBus\Tracker\MessageTracker;
+use Authters\ServiceBus\Tracker\DefaultMessageTracker;
 use AuthtersTest\ServiceBus\Example\Mock\SomeMessageHandler;
 use AuthtersTest\ServiceBus\TestCase;
 
@@ -64,7 +64,7 @@ class CommandRouteTest extends TestCase
 
     protected function dispatchWithMessage($message): Envelope
     {
-        $envelope = new Envelope($message, new MessageTracker());
+        $envelope = new Envelope($message, new DefaultMessageTracker());
         $event = $envelope->newActionEvent($this, function (MessageActionEvent $event) use ($message) {
             $event->setMessage($message);
         });

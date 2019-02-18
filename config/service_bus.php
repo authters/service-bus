@@ -68,7 +68,7 @@ return [
                 /**
                  * Default event tracker providing default events
                  */
-                'service' => \Authters\ServiceBus\Tracker\MessageTracker::class,
+                'service' => \Authters\ServiceBus\Tracker\DefaultMessageTracker::class,
 
                 /**
                  * Interact with defined events tracker

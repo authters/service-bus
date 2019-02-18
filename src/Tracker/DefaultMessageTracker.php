@@ -3,17 +3,16 @@
 namespace Authters\ServiceBus\Tracker;
 
 use Authters\ServiceBus\Contract\Tracker\ActionEvent;
-use Authters\ServiceBus\Contract\Tracker\ListenerHandler;
 use Authters\ServiceBus\Contract\Tracker\MessageActionEvent;
 use Authters\ServiceBus\Contract\Tracker\MessageTracker as BaseBusTracker;
 use Authters\ServiceBus\Support\DetectMessageName;
-use Authters\ServiceBus\Tracker\Concerns\HasDefaultEventSubscriber;
+use Authters\ServiceBus\Tracker\Concerns\HasDefaultEvents;
 use Authters\ServiceBus\Tracker\Concerns\HasSubscriber;
 use Authters\ServiceBus\Tracker\Concerns\HasTracker;
 
-final class MessageTracker implements BaseBusTracker
+final class DefaultMessageTracker implements BaseBusTracker
 {
-    use HasTracker, HasSubscriber, HasDefaultEventSubscriber, DetectMessageName;
+    use HasTracker, HasSubscriber, HasDefaultEvents, DetectMessageName;
 
     public const ACTION_EVENT_NAME = 'action_event';
 
@@ -53,15 +52,5 @@ final class MessageTracker implements BaseBusTracker
         $event->setName(self::EVENT_FINALIZE);
 
         $this->emit($event);
-    }
-
-    public function listenToDispatcher(callable $callback, int $priority = 1): ListenerHandler
-    {
-        return $this->subscribe(self::EVENT_DISPATCH, $callback, $priority);
-    }
-
-    public function listenToFinalizer(callable $callback, int $priority = 1): ListenerHandler
-    {
-        return $this->subscribe(self::EVENT_FINALIZE, $callback, $priority);
     }
 }

@@ -14,14 +14,14 @@ abstract class MessageRouter implements Router
     private $container;
 
     /**
-     * @var bool
-     */
-    protected $allowNullMessageHandler;
-
-    /**
      * @var iterable
      */
     protected $map;
+
+    /**
+     * @var bool
+     */
+    protected $allowNullMessageHandler;
 
     public function __construct(iterable $map = [],
                                 ContainerInterface $container = null,
