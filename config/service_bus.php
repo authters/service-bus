@@ -22,7 +22,7 @@ return [
                 'converter' => \Prooph\Common\Messaging\NoOpMessageConverter::class,
 
                 /**
-                 * How message should be produced async or fired immediately
+                 * How message should be produced: async or fired immediately
                  * options: "route_only_async", "route_none_async", "route_all_async"
                  *
                  * @see \Authters\ServiceBus\Contract\Envelope\Route\Strategy\MessageRouteStrategy
