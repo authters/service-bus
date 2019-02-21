@@ -5,7 +5,6 @@ namespace Authters\ServiceBus\Envelope\Bootstrap;
 use Authters\ServiceBus\Contract\Envelope\Middleware;
 use Authters\ServiceBus\Envelope\Envelope;
 use Authters\ServiceBus\Support\DetectMessageName;
-use Authters\ServiceBus\Tracker\DefaultActionEvent;
 use Psr\Log\LoggerInterface;
 
 class LoggingBootstrap implements Middleware

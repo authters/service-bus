@@ -2,12 +2,11 @@
 
 namespace Authters\ServiceBus\Envelope;
 
-use Authters\ServiceBus\Contract\Tracker\ActionEvent;
-use Authters\ServiceBus\Contract\Tracker\MessageActionEvent;
-use Authters\ServiceBus\Contract\Tracker\MessageTracker;
-use Authters\ServiceBus\Contract\Tracker\Tracker;
 use Authters\ServiceBus\Exception\RuntimeException;
 use Authters\ServiceBus\Support\DetectMessageName;
+use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\Contract\Tracker;
+use Authters\Tracker\Event\Named\OnDispatched;
 
 class Envelope
 {
@@ -29,19 +28,19 @@ class Envelope
     private $content = [];
 
     /**
-     * @var MessageTracker
+     * @var \Authters\Tracker\Contract\Tracker
      */
-    private $messageTracker;
+    private $tracker;
 
     /**
-     * @var MessageActionEvent
+     * @var ActionEvent
      */
     private $actionEvent;
 
-    public function __construct($message, MessageTracker $messageTracker)
+    public function __construct($message, Tracker $tracker)
     {
         $this->message = $message;
-        $this->messageTracker = $messageTracker;
+        $this->tracker = $tracker;
     }
 
     public function getMessage()
@@ -78,20 +77,6 @@ class Envelope
         return $this->busType;
     }
 
-    public function dispatching(MessageActionEvent $event): void
-    {
-        $this->messageTracker->initialize($event);
-
-        $this->actionEvent = $event;
-    }
-
-    public function finalizing(MessageActionEvent $event): void
-    {
-        $this->messageTracker->finalize($event);
-
-        $this->actionEvent = $event;
-    }
-
     public function markMessageReceived(): void
     {
         $this->actionEvent->setMessageHandled(true);
@@ -114,10 +99,10 @@ class Envelope
 
     public function newActionEvent($target = null, callable $callback = null): ActionEvent
     {
-        return $this->messageTracker->createEvent(Tracker::EVENT_DISPATCH, $target, $callback);
+        return $this->tracker->newActionEvent(new OnDispatched($target), $callback);
     }
 
-    public function currentActionEvent(): MessageActionEvent
+    public function currentActionEvent(): ActionEvent
     {
         return $this->actionEvent;
     }
@@ -128,7 +113,7 @@ class Envelope
             return clone $message;
         }
 
-        $envelope = new self($message, $this->messageTracker);
+        $envelope = new self($message, $this->tracker);
         $envelope->busType = $this->busType;
         $envelope->content = $this->content;
 
@@ -138,8 +123,8 @@ class Envelope
         return $envelope;
     }
 
-    public function getMessageTracker(): Tracker
+    public function getTracker(): Tracker
     {
-        return $this->messageTracker;
+        return $this->tracker;
     }
 }

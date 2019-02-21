@@ -5,8 +5,6 @@ namespace Authters\ServiceBus\Manager;
 use Authters\ServiceBus\Contract\Envelope\Route\Strategy\MessageRouteStrategy;
 use Authters\ServiceBus\Contract\Message\MessageProducer;
 use Authters\ServiceBus\Contract\Message\Router\Router;
-use Authters\ServiceBus\Contract\Tracker\EventSubscriber;
-use Authters\ServiceBus\Contract\Tracker\Tracker;
 use Authters\ServiceBus\Envelope\Route\Route;
 use Authters\ServiceBus\Envelope\Route\RouteStrategy;
 use Authters\ServiceBus\Envelope\Route\Strategy\RouteAllAsync;
@@ -14,6 +12,7 @@ use Authters\ServiceBus\Envelope\Route\Strategy\RouteNoneAsync;
 use Authters\ServiceBus\Envelope\Route\Strategy\RouteOnlyMarkedAsync;
 use Authters\ServiceBus\Exception\RuntimeException;
 use Authters\ServiceBus\Message\Async\IlluminateProducer;
+use Authters\Tracker\Contract\Tracker;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Collection;
 use Prooph\Common\Messaging\MessageConverter;
@@ -50,14 +49,15 @@ abstract class DefaultBusManager
             ?? $this->valueFrom('default.tracker.service');
 
         $defaultTracker = $this->app->make($tracker);
+        /**
         $subscribers = $this->determineSubscribers($busConfig);
 
         if ($subscribers) {
-            /** @var EventSubscriber $subscriber */
             foreach ($subscribers as $subscriber) {
                 $subscriber->attachToTracker($defaultTracker, $busType);
             }
-        }
+        }**/
+        //add support bus in subscribers ??
 
         return $defaultTracker;
     }

@@ -11,6 +11,7 @@
   ],
   "require": {
     "php": "^7.2",
+    "authters/tracker": "dev-master",
     "prooph/common": "^4.3",
     "react/promise": "^2.7",
     "beberlei/assert": "^3.0.0",
@@ -22,6 +23,12 @@
     "nunomaduro/collision": "^2.0",
     "phpunit/phpunit": "^7.0"
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/authters/tracker"
+    }
+  ],
   "autoload": {
     "psr-4": {
       "Authters\\ServiceBus\\": "src/"

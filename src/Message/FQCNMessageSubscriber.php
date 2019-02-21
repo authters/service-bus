@@ -2,16 +2,14 @@
 
 namespace Authters\ServiceBus\Message;
 
-use Authters\ServiceBus\Contract\Tracker\EventSubscriber;
-use Authters\ServiceBus\Contract\Tracker\MessageActionEvent;
-use Authters\ServiceBus\Contract\Tracker\Tracker;
-use Authters\ServiceBus\Tracker\Concerns\HasEventSubscriber;
+use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\Contract\NamedEvent;
+use Authters\Tracker\Contract\SubscribedEvent;
+use Authters\Tracker\Event\Named\OnDispatched;
 use Prooph\Common\Messaging\FQCNMessageFactory;
 
-class FQCNMessageSubscriber implements EventSubscriber
+final class FQCNMessageSubscriber implements SubscribedEvent
 {
-    use HasEventSubscriber;
-
     /**
      * @var FQCNMessageFactory
      */
@@ -22,9 +20,9 @@ class FQCNMessageSubscriber implements EventSubscriber
         $this->messageFactory = $messageFactory;
     }
 
-    public function attachToTracker(Tracker $tracker, string $messageBus): void
+    public function applyTo(): callable
     {
-        $this->listenerHandlers[] = $tracker->subscribe(Tracker::EVENT_DISPATCH, function (MessageActionEvent $event) {
+        return function (ActionEvent $event) {
             $message = $event->message();
 
             if (\is_array($message) && array_key_exists('message_name', $message)) {
@@ -39,6 +37,16 @@ class FQCNMessageSubscriber implements EventSubscriber
                 $event->setMessage($convertedMessage);
                 $event->setMessageName($messageName);
             }
-        }, Tracker::PRIORITY_INITIALIZE);
+        };
+    }
+
+    public function priority(): int
+    {
+        return 40000;
+    }
+
+    public function subscribeTo(): NamedEvent
+    {
+        return new OnDispatched();
     }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Authters\ServiceBus\Provider;
 
 use Authters\ServiceBus\Contract\Manager\ServiceBusManager;
-use Authters\ServiceBus\Manager\DefaultBusManager;
 use Authters\ServiceBus\Manager\ServiceBusManager as DefaultManager;
 use Illuminate\Support\ServiceProvider;
 

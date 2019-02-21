@@ -4,17 +4,15 @@ namespace Authters\ServiceBus\Message\Validation;
 
 use Authters\ServiceBus\Contract\Message\Validation\PreValidateMessage;
 use Authters\ServiceBus\Contract\Message\Validation\ValidateMessage;
-use Authters\ServiceBus\Contract\Tracker\EventSubscriber;
-use Authters\ServiceBus\Contract\Tracker\MessageActionEvent;
-use Authters\ServiceBus\Contract\Tracker\Tracker;
 use Authters\ServiceBus\Exception\ValidationException;
-use Authters\ServiceBus\Tracker\Concerns\HasEventSubscriber;
+use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\Contract\NamedEvent;
+use Authters\Tracker\Event\AbstractSubscriber;
+use Authters\Tracker\Event\Named\OnDispatched;
 use Illuminate\Validation\Factory;
 
-class MessageValidatorSubscriber implements EventSubscriber
+class MessageValidatorSubscriber extends AbstractSubscriber
 {
-    use HasEventSubscriber;
-
     /**
      * @var Factory
      */
@@ -25,9 +23,9 @@ class MessageValidatorSubscriber implements EventSubscriber
         $this->validationFactory = $validationFactory;
     }
 
-    public function attachToTracker(Tracker $tracker, string $messageBus): void
+    public function applyTo(): callable
     {
-        $this->listenerHandlers[] = $tracker->subscribe(Tracker::EVENT_DISPATCH, function (MessageActionEvent $event) use ($messageBus) {
+        return function (ActionEvent $event) {
             $message = $event->message();
 
             if ($message instanceof ValidateMessage) {
@@ -45,7 +43,7 @@ class MessageValidatorSubscriber implements EventSubscriber
                     $event->setException($exception);
                 }
             }
-        });
+        };
     }
 
     protected function validate(ValidateMessage $message): void
@@ -55,5 +53,15 @@ class MessageValidatorSubscriber implements EventSubscriber
         if ($validator->fails()) {
             throw ValidationException::withValidator($validator);
         }
+    }
+
+    public function priority(): int
+    {
+        return 30000;
+    }
+
+    public function subscribeTo(): NamedEvent
+    {
+        return new OnDispatched();
     }
 }

@@ -3,9 +3,9 @@
 namespace Authters\ServiceBus;
 
 use Authters\ServiceBus\Contract\Messager as BaseBus;
-use Authters\ServiceBus\Contract\Tracker\Tracker;
 use Authters\ServiceBus\Envelope\Envelope;
-use Authters\ServiceBus\Tracker\DefaultMessageTracker;
+use Authters\Tracker\Contract\Tracker;
+use Authters\Tracker\DefaultTracker;
 
 abstract class Messager implements BaseBus
 {
@@ -22,7 +22,7 @@ abstract class Messager implements BaseBus
     public function __construct(iterable $middleware = [], Tracker $tracker = null)
     {
         $this->map = $middleware;
-        $this->tracker = $tracker ?? new DefaultMessageTracker();
+        $this->tracker = $tracker ?? new DefaultTracker();
     }
 
     protected function dispatchForBus(string $busType, $message)
