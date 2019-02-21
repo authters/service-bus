@@ -83,8 +83,8 @@ abstract class DefaultBusManager
 
     private function attachSubscribersToTracker(array $busConfig, Tracker $tracker): void
     {
-        $subscribers = $this->valueFrom('tracker.subscribers.subscribers', $busConfig)
-            ?? $this->valueFrom('default.tracker.subscribers.subscribers');
+        $subscribers = $this->valueFrom('tracker.events.subscribers', $busConfig)
+            ?? $this->valueFrom('default.tracker.events.subscribers');
 
         if ($subscribers) {
             foreach ($subscribers as &$event) {

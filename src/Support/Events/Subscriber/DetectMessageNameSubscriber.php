@@ -12,11 +12,6 @@ class DetectMessageNameSubscriber extends AbstractSubscriber
 {
     use DetectMessageName;
 
-    public function subscribeTo(): NamedEvent
-    {
-        return new DispatchedEvent();
-    }
-
     public function applyTo(): callable
     {
         return function (ActionEvent $event) {
@@ -24,6 +19,11 @@ class DetectMessageNameSubscriber extends AbstractSubscriber
                 $this->detectMessageName($event->message())
             );
         };
+    }
+
+    public function subscribeTo(): NamedEvent
+    {
+        return new DispatchedEvent();
     }
 
     public function priority(): int

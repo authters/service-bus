@@ -40,13 +40,13 @@ class FQCNMessageSubscriber extends AbstractSubscriber
         };
     }
 
-    public function priority(): int
-    {
-        return 40000;
-    }
-
     public function subscribeTo(): NamedEvent
     {
         return new DispatchedEvent();
+    }
+
+    public function priority(): int
+    {
+        return 40000;
     }
 }

@@ -11,7 +11,7 @@ use Authters\Tracker\Contract\NamedEvent;
 use Authters\Tracker\Event\AbstractSubscriber;
 use Illuminate\Contracts\Validation\Factory;
 
-class MessageValidatorSubscriber extends AbstractSubscriber
+final class MessageValidatorSubscriber extends AbstractSubscriber
 {
     /**
      * @var Factory

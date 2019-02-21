@@ -6,20 +6,11 @@ use Authters\ServiceBus\Support\DetectMessageName;
 use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
 use Authters\Tracker\Contract\ActionEvent;
 use Authters\Tracker\Contract\NamedEvent;
+use Authters\Tracker\Event\AbstractSubscriber;
 
-class InitializeSubscriber
+class InitializeSubscriber extends AbstractSubscriber
 {
     use DetectMessageName;
-
-    public function priority(): int
-    {
-        return 40000;
-    }
-
-    public function subscribeTo(): NamedEvent
-    {
-        return new DispatchedEvent();
-    }
 
     public function applyTo(): callable
     {
@@ -28,5 +19,15 @@ class InitializeSubscriber
 
             $event->setMessageName($this->detectMessageName($event->message()));
         };
+    }
+
+    public function subscribeTo(): NamedEvent
+    {
+        return new DispatchedEvent();
+    }
+
+    public function priority(): int
+    {
+        return 40000;
     }
 }
