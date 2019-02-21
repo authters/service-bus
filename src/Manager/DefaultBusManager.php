@@ -49,15 +49,13 @@ abstract class DefaultBusManager
             ?? $this->valueFrom('default.tracker.service');
 
         $defaultTracker = $this->app->make($tracker);
-        /**
-        $subscribers = $this->determineSubscribers($busConfig);
 
-        if ($subscribers) {
-            foreach ($subscribers as $subscriber) {
-                $subscriber->attachToTracker($defaultTracker, $busType);
-            }
-        }**/
-        //add support bus in subscribers ??
+        if($this->app->bound($tracker)){
+            return $defaultTracker;
+        }
+
+        $this->attachEventsToTracker($busConfig, $defaultTracker);
+        $this->attachSubscribersToTracker($busConfig, $defaultTracker);
 
         return $defaultTracker;
     }
@@ -71,18 +69,28 @@ abstract class DefaultBusManager
         return $this->resolveSortedMiddleware($middleware);
     }
 
-    private function determineSubscribers(array $busConfig): array
+    private function attachEventsToTracker(array $busConfig, Tracker $tracker): void
     {
-        $subscribers = $this->valueFrom('tracker.subscribers', $busConfig)
-            ?? $this->valueFrom('default.tracker.subscribers');
+        $events = $this->valueFrom('tracker.events.named', $busConfig)
+            ?? $this->valueFrom('default.tracker.events.named');
 
-        if ($subscribers) {
-            foreach ($subscribers as &$subscriber) {
-                $subscriber = $this->app->make($subscriber);
+        if ($events) {
+            foreach ($events as &$event) {
+                $tracker->subscribe($this->app->make($event));
             }
         }
+    }
 
-        return $subscribers;
+    private function attachSubscribersToTracker(array $busConfig, Tracker $tracker): void
+    {
+        $subscribers = $this->valueFrom('tracker.subscribers.subscribers', $busConfig)
+            ?? $this->valueFrom('default.tracker.subscribers.subscribers');
+
+        if ($subscribers) {
+            foreach ($subscribers as &$event) {
+                $tracker->subscribe($this->app->make($event));
+            }
+        }
     }
 
     private function buildDefaultsMiddleware(array $busConfig): array

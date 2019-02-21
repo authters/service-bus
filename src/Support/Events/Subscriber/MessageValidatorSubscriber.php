@@ -1,15 +1,15 @@
 <?php
 
-namespace Authters\ServiceBus\Message\Validation;
+namespace Authters\ServiceBus\Support\Events\Subscriber;
 
 use Authters\ServiceBus\Contract\Message\Validation\PreValidateMessage;
 use Authters\ServiceBus\Contract\Message\Validation\ValidateMessage;
 use Authters\ServiceBus\Exception\ValidationException;
+use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
 use Authters\Tracker\Contract\ActionEvent;
 use Authters\Tracker\Contract\NamedEvent;
 use Authters\Tracker\Event\AbstractSubscriber;
-use Authters\Tracker\Event\Named\OnDispatched;
-use Illuminate\Validation\Factory;
+use Illuminate\Contracts\Validation\Factory;
 
 class MessageValidatorSubscriber extends AbstractSubscriber
 {
@@ -62,6 +62,6 @@ class MessageValidatorSubscriber extends AbstractSubscriber
 
     public function subscribeTo(): NamedEvent
     {
-        return new OnDispatched();
+        return new DispatchedEvent();
     }
 }

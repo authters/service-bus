@@ -1,14 +1,14 @@
 <?php
 
-namespace Authters\ServiceBus\Message;
+namespace Authters\ServiceBus\Support\Events\Subscriber;
 
+use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
 use Authters\Tracker\Contract\ActionEvent;
 use Authters\Tracker\Contract\NamedEvent;
-use Authters\Tracker\Contract\SubscribedEvent;
-use Authters\Tracker\Event\Named\OnDispatched;
+use Authters\Tracker\Event\AbstractSubscriber;
 use Prooph\Common\Messaging\FQCNMessageFactory;
 
-final class FQCNMessageSubscriber implements SubscribedEvent
+class FQCNMessageSubscriber extends AbstractSubscriber
 {
     /**
      * @var FQCNMessageFactory
@@ -47,6 +47,6 @@ final class FQCNMessageSubscriber implements SubscribedEvent
 
     public function subscribeTo(): NamedEvent
     {
-        return new OnDispatched();
+        return new DispatchedEvent();
     }
 }

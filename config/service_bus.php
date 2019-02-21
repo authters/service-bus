@@ -66,25 +66,30 @@ return [
             'tracker' => [
 
                 /**
-                 * Default event tracker providing default events
+                 * Default event tracker
+                 *
+                 * Events would not be attached to tracker
+                 * if a service id, bound in ioc, is provided
                  */
                 'service' => \Authters\Tracker\DefaultTracker::class,
 
                 /**
-                 * Interact with defined events tracker
+                 * Interact with tracker
                  */
-                'subscribers' => [
+                'events' => [
 
-                    /**
-                     * Transform array message to a valid message instance
-                     */
-                    \Authters\ServiceBus\Message\FQCNMessageSubscriber::class,
+                    'named' => [
+                        \Authters\ServiceBus\Support\Events\Named\DispatchedEvent::class,
+                        \Authters\ServiceBus\Support\Events\Named\FinalizedEvent::class
+                    ],
 
-                    /**
-                     * Validate / PreValidate message with the Illuminate Validator
-                     * Redundant with VO but useful for checking uniqueness/existence on PreValidation
-                     */
-                    \Authters\ServiceBus\Message\Validation\MessageValidatorSubscriber::class,
+                    'subscribers' => [
+                        \Authters\ServiceBus\Support\Events\Subscriber\DetectMessageNameSubscriber::class,
+                        \Authters\ServiceBus\Support\Events\Subscriber\ExceptionSubscriber::class,
+                        \Authters\ServiceBus\Support\Events\Subscriber\FQCNMessageSubscriber::class,
+                        \Authters\ServiceBus\Support\Events\Subscriber\InitializeSubscriber::class,
+                        \Authters\ServiceBus\Support\Events\Subscriber\MessageValidatorSubscriber::class,
+                    ]
                 ]
             ],
         ],
@@ -136,7 +141,7 @@ return [
                     'message' => [
                         'handler' => [
                             'allow_null' => true,
-                            'to_callable' =>\Authters\ServiceBus\Envelope\Route\Handler\OnEventHandler::class,
+                            'to_callable' => \Authters\ServiceBus\Envelope\Route\Handler\OnEventHandler::class,
                         ],
                     ],
                     'routes' => [
