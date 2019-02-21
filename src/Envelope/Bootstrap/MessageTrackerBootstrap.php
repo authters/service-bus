@@ -25,6 +25,7 @@ final class MessageTrackerBootstrap implements Middleware
             $event->stopPropagation(true);
 
             $event->setEvent(new OnFinalized());
+
             $envelope->getTracker()->emit($event);
         }
 

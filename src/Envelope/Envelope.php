@@ -99,7 +99,9 @@ class Envelope
 
     public function newActionEvent($target = null, callable $callback = null): ActionEvent
     {
-        return $this->tracker->newActionEvent(new OnDispatched($target), $callback);
+        $this->actionEvent = $this->tracker->newActionEvent(new OnDispatched($target), $callback);
+
+        return $this->actionEvent;
     }
 
     public function currentActionEvent(): ActionEvent
@@ -117,8 +119,10 @@ class Envelope
         $envelope->busType = $this->busType;
         $envelope->content = $this->content;
 
-        $this->actionEvent->setMessageName($this->detectMessageName($message));
-        $envelope->actionEvent = $this->actionEvent;
+        if ($this->actionEvent) {
+            $envelope->actionEvent = $this->actionEvent;
+            $envelope->actionEvent->setMessageName($this->detectMessageName($message));
+        }
 
         return $envelope;
     }
