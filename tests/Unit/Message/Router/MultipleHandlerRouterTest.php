@@ -3,8 +3,8 @@
 namespace AuthtersTest\ServiceBus\Unit\Message\Router;
 
 use Authters\ServiceBus\Message\Router\MultipleHandlerRouter;
-use AuthtersTest\ServiceBus\Example\Mock\SomeMessageHandler;
 use AuthtersTest\ServiceBus\TestCase;
+use AuthtersTest\ServiceBus\Unit\Mock\SomeMessageHandler;
 use Illuminate\Container\Container;
 use Psr\Container\ContainerInterface;
 

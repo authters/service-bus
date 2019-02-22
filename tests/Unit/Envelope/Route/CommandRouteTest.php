@@ -10,8 +10,8 @@ use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
 use Authters\ServiceBus\Support\Events\Named\FinalizedEvent;
 use Authters\Tracker\Contract\ActionEvent;
 use Authters\Tracker\DefaultTracker;
-use AuthtersTest\ServiceBus\Example\Mock\SomeMessageHandler;
 use AuthtersTest\ServiceBus\TestCase;
+use AuthtersTest\ServiceBus\Unit\Mock\SomeMessageHandler;
 
 class CommandRouteTest extends TestCase
 {
