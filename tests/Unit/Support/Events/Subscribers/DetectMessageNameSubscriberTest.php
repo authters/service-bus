@@ -26,7 +26,6 @@ class DetectMessageNameSubscriberTest extends TestCase
 
         $sub->applyTo()($event);
         $this->assertEquals($message, $event->messageName());
-
     }
 
     /**
