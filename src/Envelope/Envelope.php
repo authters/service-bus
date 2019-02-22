@@ -4,9 +4,9 @@ namespace Authters\ServiceBus\Envelope;
 
 use Authters\ServiceBus\Exception\RuntimeException;
 use Authters\ServiceBus\Support\DetectMessageName;
+use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
 use Authters\Tracker\Contract\ActionEvent;
 use Authters\Tracker\Contract\Tracker;
-use Authters\Tracker\Event\Named\OnDispatched;
 
 class Envelope
 {
@@ -99,7 +99,7 @@ class Envelope
 
     public function newActionEvent($target = null, callable $callback = null): ActionEvent
     {
-        $this->actionEvent = $this->tracker->newActionEvent(new OnDispatched($target), $callback);
+        $this->actionEvent = $this->tracker->newActionEvent(new DispatchedEvent($target), $callback);
 
         return $this->actionEvent;
     }
