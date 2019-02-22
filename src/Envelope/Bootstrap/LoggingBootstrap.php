@@ -35,7 +35,6 @@ class LoggingBootstrap implements Middleware
 
         try {
             $envelope = $next($envelope);
-
         } catch (\Throwable $exception) {
             $context['exception'] = $exception;
             $this->logger->warning("An exception occurred while handling message $messageName", $context);

@@ -2,13 +2,14 @@
 
 namespace AuthtersTest\ServiceBus\Unit\Envelope\Route;
 
-use Authters\ServiceBus\CommandBus;
 use Authters\ServiceBus\Contract\Message\Router\Router;
-use Authters\ServiceBus\Contract\Tracker\MessageActionEvent;
 use Authters\ServiceBus\Envelope\Envelope;
 use Authters\ServiceBus\Envelope\Route\CommandRoute;
 use Authters\ServiceBus\Envelope\Route\Route;
-use Authters\ServiceBus\Tracker\DefaultMessageTracker;
+use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
+use Authters\ServiceBus\Support\Events\Named\FinalizedEvent;
+use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\DefaultTracker;
 use AuthtersTest\ServiceBus\Example\Mock\SomeMessageHandler;
 use AuthtersTest\ServiceBus\TestCase;
 
@@ -20,7 +21,7 @@ class CommandRouteTest extends TestCase
     public function it_process_message_handler(): void
     {
         $message = 'foo';
-        $envelope = $this->dispatchWithMessage($message);
+        $envelope = $this->buildEnvelope($message);
 
         $this->assertFalse($envelope->hasReceipt());
 
@@ -41,7 +42,7 @@ class CommandRouteTest extends TestCase
         };
 
         $route = new CommandRoute($router);
-        $nextEnvelope = $this->handleNext($envelope, $route);
+        $nextEnvelope = $this->handleNextRoute($envelope, $route);
 
         $this->assertEquals($nextEnvelope->getMessage(), $message);
         $this->assertTrue($nextEnvelope->hasReceipt());
@@ -55,21 +56,24 @@ class CommandRouteTest extends TestCase
     {
     }
 
-    protected function handleNext(Envelope $envelope, Route $route): Envelope
+    protected function handleNextRoute(Envelope $envelope, Route $route): Envelope
     {
         return $route->handle($envelope, function () use ($envelope) {
             return $envelope;
         });
     }
 
-    protected function dispatchWithMessage($message): Envelope
+    protected function buildEnvelope($message): Envelope
     {
-        $envelope = new Envelope($message, new DefaultMessageTracker());
-        $event = $envelope->newActionEvent($this, function (MessageActionEvent $event) use ($message) {
-            $event->setMessage($message);
-        });
+        $tracker = new DefaultTracker([
+            new DispatchedEvent(), new FinalizedEvent()
+        ]);
 
-        $envelope->dispatching($event);
+        $envelope = new Envelope($message, $tracker);
+        $envelope->newActionEvent($this, function (ActionEvent $event) use ($message) {
+            $event->setMessage($message);
+            $event->setMessageName($message);
+        });
 
         return $envelope;
     }

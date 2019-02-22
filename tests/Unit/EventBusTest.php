@@ -5,30 +5,31 @@ namespace AuthtersTest\ServiceBus\Unit;
 use Authters\ServiceBus\Contract\Envelope\Middleware;
 use Authters\ServiceBus\Envelope\Bootstrap\ContentHandlerBootstrap;
 use Authters\ServiceBus\Envelope\Envelope;
-use Authters\ServiceBus\Envelope\Route\QueryRoute;
+use Authters\ServiceBus\Envelope\Route\EventRoute;
 use Authters\ServiceBus\Envelope\Route\RouteStrategy;
 use Authters\ServiceBus\Envelope\Route\Strategy\RouteNoneAsync;
-use Authters\ServiceBus\Message\Router\SingleHandlerRouter;
-use Authters\ServiceBus\QueryBus;
+use Authters\ServiceBus\EventBus;
+use Authters\ServiceBus\Message\Router\MultipleHandlerRouter;
 use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
 use Authters\ServiceBus\Support\Events\Named\FinalizedEvent;
 use Authters\Tracker\Contract\ActionEvent;
 use AuthtersTest\ServiceBus\TestCase;
-use AuthtersTest\ServiceBus\Unit\Mock\SomeQueryHandler;
-use React\Promise\PromiseInterface;
+use AuthtersTest\ServiceBus\Unit\Mock\SomeMessageHandler;
 
-class QueryBusTest extends TestCase
+class EventBusTest extends TestCase
 {
     /**
      * @test
      */
     public function it_dispatch_message(): void
     {
-        $bus = new QueryBus($this->getMiddleware());
-        $promise = $bus->dispatch($this->message);
+        $bus = new EventBus($this->getMiddleware());
 
-        $this->assertInstanceOf(PromiseInterface::class, $promise);
-        $this->assertEquals($this->message, $this->handleResult($promise));
+        $bus->dispatch($this->message);
+
+        foreach ($this->handlers as $handler){
+            $this->assertEquals($this->message, $handler->getMessage());
+        }
     }
 
     protected function getMiddleware(): iterable
@@ -36,19 +37,9 @@ class QueryBusTest extends TestCase
         return [
             new ContentHandlerBootstrap(),
             $this->getTrackerBootstrap(),
-            new QueryRoute(new SingleHandlerRouter($this->map)),
+            new EventRoute(new MultipleHandlerRouter($this->map)),
             new RouteStrategy(new RouteNoneAsync())
         ];
-    }
-
-    protected function handleResult(PromiseInterface $promise)
-    {
-        $data = null;
-        $promise->then(function ($result) use (&$data) {
-            $data = $result;
-        });
-
-        return $data;
     }
 
     protected function getTrackerBootstrap(): Middleware
@@ -72,6 +63,7 @@ class QueryBusTest extends TestCase
                 $envelope = $next($envelope);
 
                 $event->setEvent(new FinalizedEvent());
+
                 $tracker->emit($event);
 
                 return $envelope;
@@ -81,12 +73,15 @@ class QueryBusTest extends TestCase
 
     private $map = [];
     private $message;
-    private $handler;
+    private $handlers = [];
 
     protected function setUp()
     {
         $this->message = 'foo_bar';
-        $this->handler = new SomeQueryHandler();
-        $this->map = [$this->message => $this->handler];
+        $this->handlers = [
+            new SomeMessageHandler(),
+            new SomeMessageHandler()
+        ];
+        $this->map = [$this->message => $this->handlers];
     }
 }

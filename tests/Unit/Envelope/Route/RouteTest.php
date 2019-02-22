@@ -3,11 +3,13 @@
 namespace AuthtersTest\ServiceBus\Unit\Envelope\Route;
 
 use Authters\ServiceBus\Contract\Message\Router\Router;
-use Authters\ServiceBus\Contract\Tracker\MessageActionEvent;
 use Authters\ServiceBus\Envelope\Envelope;
 use Authters\ServiceBus\Envelope\Route\Handler\CallableHandler;
 use Authters\ServiceBus\Envelope\Route\Route;
-use Authters\ServiceBus\Tracker\DefaultMessageTracker;
+use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
+use Authters\ServiceBus\Support\Events\Named\FinalizedEvent;
+use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\DefaultTracker;
 use AuthtersTest\ServiceBus\Example\Mock\SomeMessageHandler;
 use AuthtersTest\ServiceBus\Example\Mock\SomeRoute;
 use AuthtersTest\ServiceBus\TestCase;
@@ -20,7 +22,7 @@ class RouteTest extends TestCase
     public function it_mark_message_received_into_envelope(): void
     {
         $message = 'foo';
-        $envelope = $this->dispatchWithMessage($message);
+        $envelope = $this->buildEnvelope($message);
 
         $this->assertFalse($envelope->hasReceipt());
 
@@ -43,7 +45,7 @@ class RouteTest extends TestCase
     {
         $message = 'foo';
 
-        $envelope = $this->dispatchWithMessage($message);
+        $envelope = $this->buildEnvelope($message);
 
         $this->assertFalse($envelope->hasReceipt());
 
@@ -94,14 +96,19 @@ class RouteTest extends TestCase
         });
     }
 
-    protected function dispatchWithMessage($message): Envelope
+    protected function buildEnvelope($message): Envelope
     {
-        $envelope = new Envelope($message, new DefaultMessageTracker());
-        $event = $envelope->newActionEvent($this, function (MessageActionEvent $event) use ($message) {
+        $tracker =new DefaultTracker([
+            new DispatchedEvent(), new FinalizedEvent()
+        ]);
+
+        $envelope = new Envelope($message, $tracker);
+        $event = $envelope->newActionEvent($this, function (ActionEvent $event) use ($message) {
             $event->setMessage($message);
+            $event->setMessageName($message);
         });
 
-        $envelope->dispatching($event);
+        $tracker->emit($event);
 
         return $envelope;
     }

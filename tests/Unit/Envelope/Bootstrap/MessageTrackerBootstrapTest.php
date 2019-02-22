@@ -2,12 +2,12 @@
 
 namespace AuthtersTest\ServiceBus\Unit\Envelope\Bootstrap;
 
-use Authters\ServiceBus\Contract\Tracker\ActionEvent;
-use Authters\ServiceBus\Contract\Tracker\Tracker;
 use Authters\ServiceBus\Envelope\Bootstrap\MessageTrackerBootstrap;
 use Authters\ServiceBus\Envelope\Envelope;
 use Authters\ServiceBus\Exception\RuntimeException;
-use Authters\ServiceBus\Tracker\DefaultMessageTracker;
+use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
+use Authters\ServiceBus\Support\Events\Named\FinalizedEvent;
+use Authters\Tracker\DefaultTracker;
 use AuthtersTest\ServiceBus\TestCase;
 
 class MessageTrackerBootstrapTest extends TestCase
@@ -17,24 +17,22 @@ class MessageTrackerBootstrapTest extends TestCase
      */
     public function it_initialize_message_event(): void
     {
-        $message = 'foo';
         $events = new MessageTrackerBootstrap();
-        $tracker = new DefaultMessageTracker();
+        $envelope = $this->getEnvelope($message = 'foo');
 
-        $listener = $tracker->listenToDispatcher(function (ActionEvent $event) {
-            $this->assertFalse($event->isPropagationStopped());
-            $this->assertEquals(Tracker::EVENT_DISPATCH, $event->getName());
-        });
+        $next = function (Envelope $currentEnvelope) {
+            $this->assertInstanceOf(
+                DispatchedEvent::class,
+                $currentEnvelope->currentActionEvent()->currentEvent()
+            );
 
-        $envelope = new Envelope($message, $tracker);
+            $this->assertEquals('foo', $currentEnvelope->currentActionEvent()->message());
 
-        $envelopeDispatched = $events->handle($envelope, function () use ($envelope, $listener) {
-            $listener->getListener()($envelope->currentActionEvent());
+            return $currentEnvelope;
+        };
 
-            return $envelope;
-        });
-
-        $this->assertEquals($message, $envelopeDispatched->getMessage());
+        $envelopeDispatched = $events->handle($envelope, $next);
+        $this->assertEquals($message, $envelopeDispatched->currentActionEvent()->message());
     }
 
     /**
@@ -42,45 +40,47 @@ class MessageTrackerBootstrapTest extends TestCase
      */
     public function it_finalize_message_event(): void
     {
-        $message = 'foo';
         $events = new MessageTrackerBootstrap();
-        $tracker = new DefaultMessageTracker();
+        $envelope = $this->getEnvelope($message = 'foo');
 
-        $listener = $tracker->listenToFinalizer(function (ActionEvent $event) {
-            $this->assertTrue($event->isPropagationStopped());
-            $this->assertEquals(Tracker::EVENT_FINALIZE, $event->getName());
-        });
+        $next = function (Envelope $currentEnvelope) {
+            return $currentEnvelope;
+        };
 
-        $envelope = new Envelope($message, $tracker);
+        $envelopeDispatched = $events->handle($envelope, $next);
+        $this->assertEquals($message, $envelopeDispatched->currentActionEvent()->message());
 
-        $envelopeFinalized = $events->handle($envelope, function () use ($envelope) {
-            return $envelope;
-        });
+        $finalized = $next($envelopeDispatched);
 
-        $this->assertEquals($message, $envelopeFinalized->getMessage());
-
-        $listener->getListener()($envelope->currentActionEvent());
+        $this->assertInstanceOf(FinalizedEvent::class, $finalized->currentActionEvent()->currentEvent());
+        $this->assertTrue($finalized->currentActionEvent()->isPropagationStopped());
     }
 
     /**
      * @test
-     * @expectedException \Authters\ServiceBus\Exception\MessageDispatchedFailure
      */
-    public function it_transform_exception_caught_during_dispatching(): void
+    public function it_catch_exception_caught_while_dispatching(): void
     {
         $message = 'foo';
         $events = new MessageTrackerBootstrap();
-        $envelope = new Envelope($message, new DefaultMessageTracker());
+        $envelope = $this->getEnvelope($message);
 
-        try {
-            $events->handle($envelope, function () {
-                throw new RuntimeException('bar');
-            });
-        } catch (\Throwable $exceptions) {
-            $this->assertTrue($envelope->currentActionEvent()->isPropagationStopped());
-            $this->assertEquals(RuntimeException::class, \get_class($exceptions->getPrevious()));
-            $this->assertEquals('bar', $exceptions->getPrevious()->getMessage());
-            throw $exceptions;
-        }
+        $envelope = $events->handle($envelope, function () {
+            throw new RuntimeException('bar');
+        });
+
+        $this->assertInstanceOf(
+            RuntimeException::class,
+            $envelope->currentActionEvent()->exception()
+        );
+    }
+
+    protected function getEnvelope($message): Envelope
+    {
+        $tracker = new DefaultTracker([
+            new DispatchedEvent(), new FinalizedEvent()
+        ]);
+
+        return new Envelope($message, $tracker);
     }
 }

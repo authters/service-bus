@@ -54,7 +54,6 @@ class MessageValidatorSubscriberTest extends TestCase
         $ev->applyTo()($actionEvent = $this->newActionEvent(true));
     }
 
-
     private function newActionEvent(bool $preValidateMessage): ActionEvent
     {
         $message = $preValidateMessage

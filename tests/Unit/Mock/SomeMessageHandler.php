@@ -1,6 +1,6 @@
 <?php
 
-namespace AuthtersTest\ServiceBus\Example\Mock;
+namespace AuthtersTest\ServiceBus\Unit\Mock;
 
 class SomeMessageHandler
 {

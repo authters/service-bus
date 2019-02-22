@@ -4,18 +4,16 @@ namespace Authters\ServiceBus\Envelope\Bootstrap;
 
 use Authters\ServiceBus\Contract\Envelope\Middleware;
 use Authters\ServiceBus\Envelope\Envelope;
+use Authters\ServiceBus\Support\Events\Named\FinalizedEvent;
 use Authters\Tracker\Contract\ActionEvent;
-use Authters\Tracker\Event\Named\OnDispatched;
-use Authters\Tracker\Event\Named\OnFinalized;
 
 final class MessageTrackerBootstrap implements Middleware
 {
     public function handle(Envelope $envelope, callable $next)
     {
-        $event = $this->createActionEvent($envelope);
+        $event = $this->createDispatchedActionEvent($envelope);
 
         try {
-            $event->setEvent(new OnDispatched());
             $envelope->getTracker()->emit($event);
 
             $envelope = $next($envelope);
@@ -24,7 +22,7 @@ final class MessageTrackerBootstrap implements Middleware
         } finally {
             $event->stopPropagation(true);
 
-            $event->setEvent(new OnFinalized());
+            $event->setEvent(new FinalizedEvent($this));
 
             $envelope->getTracker()->emit($event);
         }
@@ -32,7 +30,7 @@ final class MessageTrackerBootstrap implements Middleware
         return $envelope;
     }
 
-    private function createActionEvent(Envelope $envelope): ActionEvent
+    private function createDispatchedActionEvent(Envelope $envelope): ActionEvent
     {
         $message = $envelope->getMessage();
 

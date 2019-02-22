@@ -3,11 +3,13 @@
 namespace AuthtersTest\ServiceBus\Unit\Envelope\Route;
 
 use Authters\ServiceBus\Contract\Message\Router\Router;
-use Authters\ServiceBus\Contract\Tracker\MessageActionEvent;
 use Authters\ServiceBus\Envelope\Envelope;
 use Authters\ServiceBus\Envelope\Route\QueryRoute;
 use Authters\ServiceBus\Envelope\Route\Route;
-use Authters\ServiceBus\Tracker\DefaultMessageTracker;
+use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
+use Authters\ServiceBus\Support\Events\Named\FinalizedEvent;
+use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\DefaultTracker;
 use AuthtersTest\ServiceBus\TestCase;
 use AuthtersTest\ServiceBus\Unit\Mock\SomeQueryHandler;
 use React\Promise\PromiseInterface;
@@ -20,7 +22,7 @@ class QueryRouteTest extends TestCase
     public function it_process_message_handler(): void
     {
         $message = 'foo';
-        $envelope = $this->dispatchWithMessage($message);
+        $envelope = $this->buildEnvelope($message);
 
         $this->assertFalse($envelope->hasReceipt());
 
@@ -58,14 +60,17 @@ class QueryRouteTest extends TestCase
         });
     }
 
-    protected function dispatchWithMessage($message): Envelope
+    protected function buildEnvelope($message): Envelope
     {
-        $envelope = new Envelope($message, new DefaultMessageTracker());
-        $event = $envelope->newActionEvent($this, function (MessageActionEvent $event) use ($message) {
-            $event->setMessage($message);
-        });
+        $tracker =new DefaultTracker([
+            new DispatchedEvent(), new FinalizedEvent()
+        ]);
 
-        $envelope->dispatching($event);
+        $envelope = new Envelope($message, new $tracker);
+        $envelope->newActionEvent($this, function (ActionEvent $event) use ($message) {
+            $event->setMessage($message);
+            $event->setMessageName($message);
+        });
 
         return $envelope;
     }
