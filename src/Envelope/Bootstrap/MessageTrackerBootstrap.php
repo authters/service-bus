@@ -6,6 +6,7 @@ use Authters\ServiceBus\Contract\Envelope\Middleware;
 use Authters\ServiceBus\Envelope\Envelope;
 use Authters\ServiceBus\Support\Events\Named\FinalizedEvent;
 use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\Contract\MessageActionEvent;
 
 final class MessageTrackerBootstrap implements Middleware
 {
@@ -34,7 +35,7 @@ final class MessageTrackerBootstrap implements Middleware
     {
         $message = $envelope->getMessage();
 
-        return $envelope->newActionEvent($this, function (ActionEvent $event) use ($message) {
+        return $envelope->newActionEvent($this, function (MessageActionEvent $event) use ($message) {
             $event->setMessage($message);
         });
     }

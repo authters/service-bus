@@ -6,6 +6,7 @@ use Authters\ServiceBus\Exception\RuntimeException;
 use Authters\ServiceBus\Support\DetectMessageName;
 use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
 use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\Contract\MessageActionEvent;
 use Authters\Tracker\Contract\Tracker;
 
 class Envelope
@@ -33,7 +34,7 @@ class Envelope
     private $tracker;
 
     /**
-     * @var ActionEvent
+     * @var MessageActionEvent
      */
     private $actionEvent;
 
@@ -97,6 +98,11 @@ class Envelope
         return $this->content;
     }
 
+    /**
+     * @param object $target
+     * @param callable|null $callback
+     * @return ActionEvent|MessageActionEvent
+     */
     public function newActionEvent($target = null, callable $callback = null): ActionEvent
     {
         $this->actionEvent = $this->tracker->newActionEvent(new DispatchedEvent($target), $callback);
@@ -104,6 +110,9 @@ class Envelope
         return $this->actionEvent;
     }
 
+    /**
+     * @return ActionEvent|MessageActionEvent
+     */
     public function currentActionEvent(): ActionEvent
     {
         return $this->actionEvent;

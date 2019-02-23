@@ -43,7 +43,7 @@ abstract class DefaultBusManager
         $this->namespace = $namespace;
     }
 
-    protected function newMessageTracker(string $busType, array $busConfig): Tracker
+    protected function newMessageTracker(array $busConfig): Tracker
     {
         $tracker = $this->valueFrom('tracker.service', $busConfig)
             ?? $this->valueFrom('default.tracker.service');

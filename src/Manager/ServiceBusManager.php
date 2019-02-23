@@ -47,7 +47,7 @@ class ServiceBusManager extends DefaultBusManager implements Manager
 
         return new $serviceBusId(
             $this->buildMiddleware($busConfig),
-            $this->newMessageTracker($busType, $busConfig)
+            $this->newMessageTracker($busConfig)
         );
     }
 

@@ -8,7 +8,7 @@ use Authters\ServiceBus\Envelope\Route\Handler\CallableHandler;
 use Authters\ServiceBus\Envelope\Route\Route;
 use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
 use Authters\ServiceBus\Support\Events\Named\FinalizedEvent;
-use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\Contract\MessageActionEvent;
 use Authters\Tracker\DefaultTracker;
 use AuthtersTest\ServiceBus\TestCase;
 use AuthtersTest\ServiceBus\Unit\Mock\SomeMessageHandler;
@@ -103,7 +103,7 @@ class RouteTest extends TestCase
         ]);
 
         $envelope = new Envelope($message, $tracker);
-        $event = $envelope->newActionEvent($this, function (ActionEvent $event) use ($message) {
+        $event = $envelope->newActionEvent($this, function (MessageActionEvent $event) use ($message) {
             $event->setMessage($message);
             $event->setMessageName($message);
         });

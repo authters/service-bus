@@ -3,7 +3,7 @@
 namespace Authters\ServiceBus\Support\Events\Subscriber;
 
 use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
-use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\Contract\MessageActionEvent;
 use Authters\Tracker\Contract\NamedEvent;
 use Authters\Tracker\Event\AbstractSubscriber;
 use Prooph\Common\Messaging\FQCNMessageFactory;
@@ -22,7 +22,7 @@ class FQCNMessageSubscriber extends AbstractSubscriber
 
     public function applyTo(): callable
     {
-        return function (ActionEvent $event) {
+        return function (MessageActionEvent $event) {
             $message = $event->message();
 
             if (\is_array($message) && array_key_exists('message_name', $message)) {

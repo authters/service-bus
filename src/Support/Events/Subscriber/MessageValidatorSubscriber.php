@@ -6,7 +6,7 @@ use Authters\ServiceBus\Contract\Message\Validation\PreValidateMessage;
 use Authters\ServiceBus\Contract\Message\Validation\ValidateMessage;
 use Authters\ServiceBus\Exception\ValidationException;
 use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
-use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\Contract\MessageActionEvent;
 use Authters\Tracker\Contract\NamedEvent;
 use Authters\Tracker\Event\AbstractSubscriber;
 use Illuminate\Contracts\Validation\Factory;
@@ -25,7 +25,7 @@ final class MessageValidatorSubscriber extends AbstractSubscriber
 
     public function applyTo(): callable
     {
-        return function (ActionEvent $event) {
+        return function (MessageActionEvent $event) {
             $message = $event->message();
 
             if ($message instanceof ValidateMessage) {

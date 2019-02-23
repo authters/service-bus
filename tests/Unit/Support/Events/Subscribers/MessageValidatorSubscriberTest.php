@@ -7,6 +7,7 @@ use Authters\ServiceBus\Contract\Message\Validation\ValidateMessage;
 use Authters\ServiceBus\Exception\ValidationException;
 use Authters\ServiceBus\Support\Events\Subscriber\MessageValidatorSubscriber;
 use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\Contract\MessageActionEvent;
 use Authters\Tracker\Contract\NamedEvent;
 use Authters\Tracker\DefaultActionEvent;
 use Authters\Tracker\Event\AbstractNamedEvent;
@@ -60,7 +61,7 @@ class MessageValidatorSubscriberTest extends TestCase
             ? $this->preValidateMessage()
             : $this->validateMessage();
 
-        return new DefaultActionEvent($this->someEvent(), function (ActionEvent $event) use ($message) {
+        return new DefaultActionEvent($this->someEvent(), function (MessageActionEvent $event) use ($message) {
             $event->setMessage($message);
         });
     }

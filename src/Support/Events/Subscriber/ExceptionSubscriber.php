@@ -3,7 +3,7 @@
 namespace Authters\ServiceBus\Support\Events\Subscriber;
 
 use Authters\ServiceBus\Support\Events\Named\FinalizedEvent;
-use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\Contract\MessageActionEvent;
 use Authters\Tracker\Contract\NamedEvent;
 use Authters\Tracker\Event\AbstractSubscriber;
 
@@ -21,7 +21,7 @@ class ExceptionSubscriber extends AbstractSubscriber
 
     public function applyTo(): callable
     {
-        return function (ActionEvent $event) {
+        return function (MessageActionEvent $event) {
             if ($exception = $event->exception()) {
                 throw $exception;
             }

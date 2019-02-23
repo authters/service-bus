@@ -12,7 +12,7 @@ use Authters\ServiceBus\Message\Router\SingleHandlerRouter;
 use Authters\ServiceBus\QueryBus;
 use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
 use Authters\ServiceBus\Support\Events\Named\FinalizedEvent;
-use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\Contract\MessageActionEvent;
 use AuthtersTest\ServiceBus\TestCase;
 use AuthtersTest\ServiceBus\Unit\Mock\SomeQueryHandler;
 use React\Promise\PromiseInterface;
@@ -62,7 +62,7 @@ class QueryBusTest extends TestCase
                 $tracker->subscribe(new FinalizedEvent());
                 $message = $envelope->getMessage();
 
-                $event = $envelope->newActionEvent($this, function (ActionEvent $event) use ($message) {
+                $event = $envelope->newActionEvent($this, function (MessageActionEvent $event) use ($message) {
                     $event->setMessage($message);
                     $event->setMessageName($message);
                 });

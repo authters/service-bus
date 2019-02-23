@@ -4,7 +4,7 @@ namespace AuthtersTest\ServiceBus\Unit\Support\Events\Subscribers;
 
 use Authters\ServiceBus\Support\Events\Named\DispatchedEvent;
 use Authters\ServiceBus\Support\Events\Subscriber\FQCNMessageSubscriber;
-use Authters\Tracker\Contract\ActionEvent;
+use Authters\Tracker\Contract\MessageActionEvent;
 use Authters\Tracker\DefaultActionEvent;
 use AuthtersTest\ServiceBus\TestCase;
 use AuthtersTest\ServiceBus\Unit\Mock\SomeCommand;
@@ -48,9 +48,9 @@ class FQCNMessageSubscriberTest extends TestCase
         $this->assertEquals($message, $ev->message());
     }
 
-    protected function actionEvent($message): ActionEvent
+    protected function actionEvent($message): MessageActionEvent
     {
-        return new DefaultActionEvent(new DispatchedEvent(), function (ActionEvent $event) use ($message) {
+        return new DefaultActionEvent(new DispatchedEvent(), function (MessageActionEvent $event) use ($message) {
             $event->setMessage($message);
         });
     }
