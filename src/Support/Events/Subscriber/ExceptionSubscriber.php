@@ -11,7 +11,7 @@ class ExceptionSubscriber extends AbstractSubscriber
 {
     public function priority(): int
     {
-        return 40000;
+        return 1;
     }
 
     public function subscribeTo(): NamedEvent

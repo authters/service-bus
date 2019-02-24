@@ -21,7 +21,7 @@ final class MessageTrackerBootstrap implements Middleware
         } catch (\Throwable $exception) {
             $event->setException($exception);
         } finally {
-            $event->stopPropagation(true);
+            $event->stopPropagation(false);
 
             $event->setEvent(new FinalizedEvent($this));
 
